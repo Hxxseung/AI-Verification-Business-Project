@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+// 상품 관리를 위한 컨트롤러
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -18,17 +19,20 @@ public class ProductController {
 
     private final ProductService productService;
 
+    // 상품 생성 (ADMIN, OWNER만 접근 가능)
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PostMapping
     public ProductResponseDto createProduct(@RequestBody @Valid ProductRequestDto requestDto) {
         return productService.createProduct(requestDto);
     }
 
+    // 상품 조회 (ID로 조회)
     @GetMapping("/{id}")
     public ProductResponseDto getProduct(@PathVariable Long id) {
         return productService.getProductById(id);
     }
 
+    // 상품 수정 (ADMIN, OWNER만 접근 가능)
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PutMapping("/{id}")
     public ProductResponseDto updateProduct(
@@ -40,6 +44,7 @@ public class ProductController {
         return productService.updateProduct(id, requestDto, userRole, userId);
     }
 
+    // 상품 삭제 (ADMIN, OWNER만 접근 가능)
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @DeleteMapping("/{id}")
     public void deleteProduct(
@@ -50,6 +55,7 @@ public class ProductController {
         productService.deleteProduct(id, userRole, userId);
     }
 
+    // 상품 검색 (키워드로 검색)
     @GetMapping("/search")
     public Page<ProductResponseDto> searchProducts(
             @RequestParam String keyword,

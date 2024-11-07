@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 
+// 상품 관련 비즈니스 로직을 처리하는 서비스
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -26,6 +27,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
 
+    // 상품 생성
     public ProductResponseDto createProduct(ProductRequestDto requestDto) {
         Store store = storeRepository.findById(requestDto.getStoreId())
                 .orElseThrow(() -> new StoreNotFoundException("Store not found"));
@@ -42,12 +44,14 @@ public class ProductService {
         return convertToDto(savedProduct);
     }
 
+    // 상품 조회 (ID로 조회)
     public ProductResponseDto getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
         return convertToDto(product);
     }
 
+    // 상품 수정
     public ProductResponseDto updateProduct(Long id, ProductRequestDto requestDto, String userRole, Long userId) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
@@ -68,6 +72,7 @@ public class ProductService {
         return convertToDto(updatedProduct);
     }
 
+    // 상품 삭제
     public void deleteProduct(Long id, String userRole, Long userId) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
@@ -81,6 +86,7 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
+    // 상품 검색 (키워드로 검색)
     public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(
@@ -94,6 +100,7 @@ public class ProductService {
         return products.map(this::convertToDto);
     }
 
+    // Product 엔티티를 ProductResponseDto로 변환
     private ProductResponseDto convertToDto(Product product) {
         ProductResponseDto responseDto = new ProductResponseDto();
         responseDto.setId(product.getId());
