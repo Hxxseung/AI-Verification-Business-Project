@@ -1,4 +1,4 @@
-package com.sparta.aibusinessproject.domain.store.response;
+package com.sparta.aibusinessproject.domain.store.dto.response;
 
 import com.sparta.aibusinessproject.domain.store.entity.Store;
 import lombok.Builder;

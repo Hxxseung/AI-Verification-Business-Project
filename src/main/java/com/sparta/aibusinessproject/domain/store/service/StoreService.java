@@ -37,22 +37,22 @@ public class StoreService {
     }
 
     // 가게 리스트 출력
-    public Page<com.sparta.aibusinessproject.domain.store.response.StoreSearchListResponse> getStores(StoreSearchListRequest searchDto, Pageable pageable) {
+    public Page<com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchListResponse> getStores(StoreSearchListRequest searchDto, Pageable pageable) {
         return storeRepository.searchStores(searchDto, pageable);
     }
 
     // 가게 세부 조회
     @Transactional
-    public com.sparta.aibusinessproject.domain.store.response.StoreSearchResponse getStoreById(UUID storeId) {
+    public com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchResponse getStoreById(UUID storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_STORE));
 
-        return  com.sparta.aibusinessproject.domain.store.response.StoreSearchResponse.from(store);
+        return  com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchResponse.from(store);
     }
 
     // 가게 수정
     @Transactional
-    public StoreData update(UUID storeId, com.sparta.aibusinessproject.domain.store.request.StoreUpdateRequest request) {
+    public StoreData update(UUID storeId, com.sparta.aibusinessproject.domain.store.dto.request.StoreUpdateRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_STORE));
 

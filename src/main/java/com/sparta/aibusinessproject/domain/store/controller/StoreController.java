@@ -30,19 +30,19 @@ public class StoreController {
 
     // 가게 상세 조회
     @GetMapping("/{storeId}")
-    public Response<com.sparta.aibusinessproject.domain.store.response.StoreSearchResponse> getStore(@PathVariable UUID storeId) {
+    public Response<com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchResponse> getStore(@PathVariable UUID storeId) {
         return Response.success(storeService.getStoreById(storeId));
     }
 
     // 가게 리스트 전부 출력
     @GetMapping
-    public Response<Page<com.sparta.aibusinessproject.domain.store.response.StoreSearchListResponse>> getAllStores(@RequestBody StoreSearchListRequest searchDto, Pageable pageable) {
+    public Response<Page<com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchListResponse>> getAllStores(@RequestBody StoreSearchListRequest searchDto, Pageable pageable) {
         return Response.success(storeService.getStores(searchDto,pageable));
     }
 
     // 가게 수정
     @PatchMapping("/{storeId}")
-    public Response<StoreData> storeUpdate(@PathVariable UUID storeId , @RequestBody com.sparta.aibusinessproject.domain.store.request.StoreUpdateRequest request){
+    public Response<StoreData> storeUpdate(@PathVariable UUID storeId , @RequestBody com.sparta.aibusinessproject.domain.store.dto.request.StoreUpdateRequest request){
         return  Response.success(storeService.update(storeId,request));
     }
 

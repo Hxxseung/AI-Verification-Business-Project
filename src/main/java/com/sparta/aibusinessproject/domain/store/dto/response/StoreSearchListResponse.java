@@ -1,4 +1,4 @@
-package com.sparta.aibusinessproject.domain.store.response;
+package com.sparta.aibusinessproject.domain.store.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,31 +7,13 @@ import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-public class StoreSearchListResponse {
-    private UUID storeId;
+import lombok.Builder;
 
-    private UUID userId;
-
-    private String name;
-
-    private String category;
-
-    private String address;
-
-    private String description;
-
-    private String phone;
-
-    private String status;
-
-    private Timestamp createdAt;
-
-    private String createdBy;
-
-    private Timestamp modifiedAt;
-
-    private String modifiedBy;
+@Builder
+public record StoreSearchListResponse(
+        String name,
+        int minDeliveryPrice
+        // TODO : Menu Entity 연동시 List형식으로 반환
+//        List<MenuResponseDto> menuDto
+){
 }
