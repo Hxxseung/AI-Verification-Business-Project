@@ -14,11 +14,20 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Base64;
@@ -27,22 +36,16 @@ import org.springframework.util.StringUtils;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    // Header KEY 값
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    // 사용자 권한 값의 KEY
-    public static final String AUTHORIZATION_KEY = "auth";
-    // Token 식별자
-    public static final String BEARER_PREFIX = "Bearer ";
-    // 토큰 만료시간
-    private final long TOKEN_TIME = 60 * 60 * 1000L; // 60분
+    public static final String AUTHORIZATION_HEADER = "Authorization"; // Header KEY 값
+    public static final String AUTHORIZATION_KEY = "auth"; // 사용자 권한 값의 KEY
+    public static final String BEARER_PREFIX = "Bearer "; // Token 식별자
+    private final long TOKEN_EXPIRE_TIME = 10000 * 60 * 1000L; // 토큰 만료시간 10000분
 
     @Value("${jwt.secret.key}") // Base64 Encode 한 SecretKey
     private String secretKey;
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
-    // 로그 설정
-    public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
+    public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그"); // 로그 설정
 
     @PostConstruct
     public void init() {
@@ -50,42 +53,39 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    // 토큰 생성
-    public String createToken(String username, MemberRole role) {
-        Date date = new Date();
+    public TokenDto generateTokenDto(Authentication authentication) {
+        // 권한들 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
-        return BEARER_PREFIX +
-                Jwts.builder()
-                        .setSubject(username) // 사용자 식별자값(ID)
-                        .claim(AUTHORIZATION_KEY, role) // 사용자 권한
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
-                        .setIssuedAt(date) // 발급일
-                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘
-                        .compact();
+        String accessToken = generateAccessToken(authentication.getName(), authorities);
+        String refreshToken = generateRefreshToken(authentication.getName(), authorities);
+        long now = (new Date()).getTime();
+
+        return TokenDto.from(BEARER_PREFIX, accessToken, refreshToken, new Date(now + TOKEN_EXPIRE_TIME));
     }
 
-    // JWT Cookie 에 저장
-    public void addJwtToCookie(String token, HttpServletResponse res) {
-        try {
-            token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
-
-            Cookie cookie = new Cookie(AUTHORIZATION_HEADER, token); // Name-Value
-            cookie.setPath("/");
-
-            // Response 객체에 Cookie 추가
-            res.addCookie(cookie);
-        } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage());
-        }
+    private String generateAccessToken(String email, String authorities) {
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + TOKEN_EXPIRE_TIME);
+        return Jwts.builder()
+                .setSubject(email)
+                .claim(AUTHORIZATION_KEY, authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
 
-    // JWT 토큰 substring
-    public String substringToken(String tokenValue) {
-        if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
-        }
-        logger.error("Not Found Token");
-        throw new NullPointerException("Not Found Token");
+    private String generateRefreshToken(String email, String authorities) {
+        long now = (new Date()).getTime();
+        return Jwts.builder()
+                .setSubject(email)
+                .claim(AUTHORIZATION_KEY, authorities)
+                .setExpiration(new Date(now + TOKEN_EXPIRE_TIME))
+                .claim("isRefreshToken", true) // refreshToken 임을 나타내는 클레임 추가
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
 
     // 토큰 검증
@@ -105,8 +105,31 @@ public class JwtUtil {
         return false;
     }
 
-    // 토큰에서 사용자 정보 가져오기
-    public Claims getUserInfoFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    public Authentication getAuthentication(String accessToken) {
+        // 토큰 복호화
+        Claims claims = parseClaims(accessToken);
+
+        if (claims.get(AUTHORIZATION_KEY) == null) {
+            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+        }
+
+        // 클레임에서 권한 정보 가져오기
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORIZATION_KEY).toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+        // UserDetails 객체를 만들어서 Authentication 리턴
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+    }
+
+    private Claims parseClaims(String accessToken) {
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 }
