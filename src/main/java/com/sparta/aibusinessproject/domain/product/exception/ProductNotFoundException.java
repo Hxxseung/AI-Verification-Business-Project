@@ -1,12 +1,11 @@
 package com.sparta.aibusinessproject.domain.product.exception;
 
-public class ProductNotFoundException extends RuntimeException {
+import com.sparta.aibusinessproject.global.exception.ApplicationException;
+import com.sparta.aibusinessproject.global.exception.ErrorCode;
 
-    public ProductNotFoundException(String message) {
-        super(message); // 예외 메시지를 부모 클래스로 전달
-    }
+public class ProductNotFoundException extends ApplicationException {
 
     public ProductNotFoundException() {
-        super("Product not found"); // 기본 메시지 제공
+        super(ErrorCode.PRODUCT_NOT_FOUND); // ErrorCode에 정의된 메시지와 상태를 사용
     }
 }
