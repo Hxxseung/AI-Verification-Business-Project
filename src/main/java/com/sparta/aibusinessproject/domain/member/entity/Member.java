@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -31,17 +32,13 @@ public class Member extends BaseEntity {
     @Column(name = "member_id")
     private UUID id;
 
-    @Pattern(regexp = "^[a-z0-9]{4,10}$",
-            message = "아이디는 영문 소문자 및 숫자 4~10자리여야 합니다.")
     @Column(nullable = false, unique = true)
-    private String loginId;
+    private String username;
 
     @Size(min = 2, max = 20, message = "이름은 2자 이상 20자미만이어야 합니다.")
     @Column(nullable = false)
-    private String name;
+    private String nickname;
 
-    @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*]{8,15}$",
-            message = "비밀번호는 영문 대소문자, 숫자, 특수문자(!@#$%^&*)를 허용하고 8~15자리여야 합니다.")
     @Column(nullable = false)
     private String password;
 
@@ -54,11 +51,11 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private MemberRole role;
 
-    public static Member create(SignupRequest request) {
+    public static Member create(SignupRequest request, PasswordEncoder passwordEncoder) {
         return Member.builder()
-                .loginId(request.loginId())
-                .name(request.name())
-                .password(request.password()) // 암호화 됐는지 확인 필요
+                .username(request.username())
+                .nickname(request.nickname())
+                .password(passwordEncoder.encode(request.password()))
                 .email(request.email())
                 .role(request.role())
                 .build();

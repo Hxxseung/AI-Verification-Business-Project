@@ -6,13 +6,13 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, UUID> {
-    Optional<Member> findByLoginId(String loginId);
+    Optional<Member> findByUsername(String username);
 
     Optional<Member> findByEmail(String email);
 
-    default void checkDuplicatedId(String loginId) {
-        findByLoginId(loginId).ifPresent(member -> {
-            throw new IllegalArgumentException(loginId + "는 이미 사용 중인 아이디입니다.");
+    default void checkDuplicatedUsername(String username) {
+        findByUsername(username).ifPresent(member -> {
+            throw new IllegalArgumentException(username + "는 이미 사용 중인 아이디입니다.");
         });
     }
 
