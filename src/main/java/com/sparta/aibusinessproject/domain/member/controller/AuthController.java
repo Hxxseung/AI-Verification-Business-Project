@@ -1,13 +1,20 @@
 package com.sparta.aibusinessproject.domain.member.controller;
 
+import com.sparta.aibusinessproject.domain.member.dto.request.SignupRequest;
+import com.sparta.aibusinessproject.domain.member.dto.response.LoginResponse;
 import com.sparta.aibusinessproject.domain.member.entity.MemberRole;
+import com.sparta.aibusinessproject.domain.member.service.MemberService;
 import com.sparta.aibusinessproject.security.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.UnsupportedEncodingException;
@@ -15,41 +22,15 @@ import java.net.URLEncoder;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/auth")
 public class AuthController {
 
-    private final JwtUtil jwtUtil;
+    private final MemberService memberService;
 
-    @GetMapping("/create-jwt")
-    public String createJwt(HttpServletResponse res) {
-        // Jwt 생성
-        String token = jwtUtil.createToken("zuhee", MemberRole.CUSTOMER);
-
-        // Jwt 쿠키 저장
-        jwtUtil.addJwtToCookie(token, res);
-
-        return "createJwt : " + token;
+    @PostMapping("/signup")
+    public ResponseEntity<LoginResponse> signup(@Valid @RequestBody SignupRequest request) {
+        LoginResponse loginResponse = memberService.signup(request);
+        return ResponseEntity.ok(loginResponse);
     }
 
-    @GetMapping("/get-jwt")
-    public String getJwt(@CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
-        // JWT 토큰 substring
-        String token = jwtUtil.substringToken(tokenValue);
-
-        // 토큰 검증
-        if(!jwtUtil.validateToken(token)){
-            throw new IllegalArgumentException("Token Error");
-        }
-
-        // 토큰에서 사용자 정보 가져오기
-        Claims info = jwtUtil.getUserInfoFromToken(token);
-        // 사용자 username
-        String username = info.getSubject();
-        System.out.println("username = " + username);
-        // 사용자 권한
-        String authority = (String) info.get(JwtUtil.AUTHORIZATION_KEY);
-        System.out.println("authority = " + authority);
-
-        return "getJwt : " + username + ", " + authority;
-    }
 }
