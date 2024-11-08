@@ -1,15 +1,17 @@
 package com.sparta.aibusinessproject.domain.store.controller;
 
 
-import com.sparta.aibusinessproject.domain.store.dto.StoreRequestDto;
-import com.sparta.aibusinessproject.domain.store.dto.StoreResponseDto;
+import com.sparta.aibusinessproject.domain.store.dto.StoreData;
+import com.sparta.aibusinessproject.domain.store.exception.Response;
+import com.sparta.aibusinessproject.domain.store.request.StoreCreateRequest;
+import com.sparta.aibusinessproject.domain.store.request.StoreSearchListRequest;
+import com.sparta.aibusinessproject.domain.store.request.StoreUpdateRequest;
+import com.sparta.aibusinessproject.domain.store.response.StoreSearchListResponse;
+import com.sparta.aibusinessproject.domain.store.response.StoreSearchResponse;
 import com.sparta.aibusinessproject.domain.store.service.StoreService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -22,30 +24,35 @@ public class StoreController {
     private final StoreService storeService;
 
 
-    // 가게 등록
+    // 가게 생성
     @PostMapping
-    public StoreResponseDto createStore(@RequestBody @Valid StoreRequestDto requestDto) {
-        return storeService.createStore(requestDto);
+    public Response<?> store(@RequestBody StoreCreateRequest request) {
+        storeService.createOrder(request);
+        return  Response.success("가게 생성에 성공하였습니다");
     }
 
-    // 가게 단건 조회
+    // 가게 상세 조회
     @GetMapping("/{storeId}")
-    public StoreResponseDto getStore(@PathVariable UUID storeId) {
-        return storeService.getStoreById(storeId);
+    public Response<StoreSearchResponse> getStore(@PathVariable UUID storeId) {
+        return Response.success(storeService.getStoreById(storeId));
     }
 
-    //가게 정보 수정
-    @PutMapping("/{storeId}")
-    public StoreResponseDto updateStore(@PathVariable UUID storeId, @RequestBody @Valid StoreRequestDto requestDto) {
-        return storeService.updateStore(requestDto);
+    // 가게 리스트 전부 출력
+    @GetMapping
+    public Response<Page<StoreSearchListResponse>> getAllStores(@RequestBody StoreSearchListRequest searchDto, Pageable pageable) {
+        return Response.success(storeService.getStores(searchDto,pageable));
     }
 
-    //가게 삭제
-    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    // 가게 수정
+    @PatchMapping("/{storeId}")
+    public Response<StoreData> storeUpdate(@PathVariable UUID storeId , @RequestBody StoreUpdateRequest request){
+        return  Response.success(storeService.update(storeId,request));
+    }
+
+    // 가게 삭제
     @DeleteMapping("/{storeId}")
-    public void deleteStore(@PathVariable UUID storeId,@RequestBody @Valid StoreRequestDto requestDto ,Authentication authentication) {
-        String userRole = authentication.getAuthorities().iterator().next().getAuthority();
-        String userId = authentication.getName();
-        return storeService.deleteStore(requestDto);
+    public Response<?> storeDelete(@PathVariable UUID storeId) {
+        storeService.delete(storeId);
+        return Response.success("가게 정보가 삭제되었습니다.");
     }
 }
