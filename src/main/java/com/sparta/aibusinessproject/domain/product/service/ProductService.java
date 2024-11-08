@@ -7,6 +7,7 @@ import com.sparta.aibusinessproject.domain.product.entity.ProductStatus;
 import com.sparta.aibusinessproject.domain.product.exception.ProductNotFoundException;
 import com.sparta.aibusinessproject.domain.product.exception.StoreNotFoundException;
 import com.sparta.aibusinessproject.domain.product.repository.ProductRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -79,7 +80,7 @@ public class ProductService {
     public ProductResponseDto updateProductVisibility(UUID id, boolean isHidden, String userRole, UUID userId) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
-
+        // 권한 체킹
         if (!userRole.equals("ADMIN") && (!userRole.equals("OWNER") || !product.getStore().getMember().getUserId().equals(userId))) {
             throw new AccessDeniedException("권한이 없습니다.");
         }
@@ -87,6 +88,26 @@ public class ProductService {
         product.setHidden(isHidden);
         Product updatedProduct = productRepository.save(product);
 
+        return convertToDto(updatedProduct);
+    }
+
+    // 상품 정보 업데이트
+    public ProductResponseDto updateProduct(UUID id, @Valid ProductRequestDto requestDto, String userRole, UUID userId) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+
+        // 권한 확인
+        if (!userRole.equals("ADMIN") && (!userRole.equals("OWNER") || !product.getStore().getMember().getUserId().equals(userId))) {
+            throw new AccessDeniedException("본인의 가게 상품만 수정할 수 있습니다.");
+        }
+
+        // 상품 정보 업데이트
+        product.setName(requestDto.getName());
+        product.setDescription(requestDto.getDescription());
+        product.setPrice(requestDto.getPrice());
+        product.setStatus(ProductStatus.AVAILABLE); // 기본 값으로 AVAILABLE 하게 설정
+
+        Product updatedProduct = productRepository.save(product);
         return convertToDto(updatedProduct);
     }
 
