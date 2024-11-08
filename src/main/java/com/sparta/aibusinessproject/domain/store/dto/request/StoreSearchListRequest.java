@@ -1,4 +1,4 @@
-package com.sparta.aibusinessproject.domain.store.request;
+package com.sparta.aibusinessproject.domain.store.dto.request;
 
 public record StoreSearchListRequest(
         String category,

@@ -3,11 +3,8 @@ package com.sparta.aibusinessproject.domain.store.controller;
 
 import com.sparta.aibusinessproject.domain.store.dto.StoreData;
 import com.sparta.aibusinessproject.domain.store.exception.Response;
-import com.sparta.aibusinessproject.domain.store.request.StoreCreateRequest;
-import com.sparta.aibusinessproject.domain.store.request.StoreSearchListRequest;
-import com.sparta.aibusinessproject.domain.store.request.StoreUpdateRequest;
-import com.sparta.aibusinessproject.domain.store.response.StoreSearchListResponse;
-import com.sparta.aibusinessproject.domain.store.response.StoreSearchResponse;
+import com.sparta.aibusinessproject.domain.store.dto.request.StoreCreateRequest;
+import com.sparta.aibusinessproject.domain.store.dto.request.StoreSearchListRequest;
 import com.sparta.aibusinessproject.domain.store.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,19 +30,19 @@ public class StoreController {
 
     // 가게 상세 조회
     @GetMapping("/{storeId}")
-    public Response<StoreSearchResponse> getStore(@PathVariable UUID storeId) {
+    public Response<com.sparta.aibusinessproject.domain.store.response.StoreSearchResponse> getStore(@PathVariable UUID storeId) {
         return Response.success(storeService.getStoreById(storeId));
     }
 
     // 가게 리스트 전부 출력
     @GetMapping
-    public Response<Page<StoreSearchListResponse>> getAllStores(@RequestBody StoreSearchListRequest searchDto, Pageable pageable) {
+    public Response<Page<com.sparta.aibusinessproject.domain.store.response.StoreSearchListResponse>> getAllStores(@RequestBody StoreSearchListRequest searchDto, Pageable pageable) {
         return Response.success(storeService.getStores(searchDto,pageable));
     }
 
     // 가게 수정
     @PatchMapping("/{storeId}")
-    public Response<StoreData> storeUpdate(@PathVariable UUID storeId , @RequestBody StoreUpdateRequest request){
+    public Response<StoreData> storeUpdate(@PathVariable UUID storeId , @RequestBody com.sparta.aibusinessproject.domain.store.request.StoreUpdateRequest request){
         return  Response.success(storeService.update(storeId,request));
     }
 
