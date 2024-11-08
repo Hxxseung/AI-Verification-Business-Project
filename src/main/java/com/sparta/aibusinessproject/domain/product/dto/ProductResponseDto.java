@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class ProductResponseDto {
-    private Long id; // 상품 ID
+    private UUID id; // 상품 UUID
     private String name; // 상품 이름
     private String description; // 상품 설명
-    private double price; // 상품 가격
-    private int stock; // 상품 재고
+    private int price; // 상품 가격
     private String status; // 상품 상태
     private String storeName; // 스토어 이름
 

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 public class ProductRequestDto {
@@ -18,14 +17,8 @@ public class ProductRequestDto {
     private String description; // 상품 설명
 
     @Positive(message = "가격은 0보다 커야 합니다.")
-    private double price; // 상품 가격
+    private int price; // 상품 가격 (INT 타입)
 
-    @Positive(message = "재고는 0보다 커야 합니다.")
-    private int stock; // 상품 재고
-
-    @NotBlank(message = "상태 값은 필수입니다.")
-    private String status; // 상품 상태 (AVAILABLE, OUT_OF_STOCK 등)
-
-    @NotNull(message = "스토어 ID는 필수입니다.")
-    private Long storeId; // 연결된 스토어 ID
+    @NotBlank(message = "스토어 ID는 필수입니다.")
+    private String storeId; // 연결된 스토어 UUID
 }

@@ -16,8 +16,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
-// 상품 관련 비즈니스 로직을 처리하는 서비스
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -27,15 +27,15 @@ public class ProductService {
 
     // 상품 생성
     public ProductResponseDto createProduct(ProductRequestDto requestDto) {
-        Store store = storeRepository.findById(requestDto.getStoreId())
-                .orElseThrow(() -> new StoreNotFoundException("Store not found"));
+        Store store = storeRepository.findById(UUID.fromString(requestDto.getStoreId()))
+                .orElseThrow(() -> new StoreNotFoundException("Store not found with id: " + requestDto.getStoreId()));
 
         Product product = new Product();
         product.setName(requestDto.getName());
         product.setDescription(requestDto.getDescription());
         product.setPrice(requestDto.getPrice());
-        product.setStock(requestDto.getStock());
-        product.setStatus(ProductStatus.valueOf(requestDto.getStatus().toUpperCase()));
+        product.setHidden(false); // 기본 숨김 상태: false
+        product.setStatus(ProductStatus.AVAILABLE); // 기본 상태 설정
         product.setStore(store);
 
         Product savedProduct = productRepository.save(product);
@@ -43,48 +43,13 @@ public class ProductService {
     }
 
     // 상품 조회 (ID로 조회)
-    public ProductResponseDto getProductById(Long id) {
+    public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
         return convertToDto(product);
     }
 
-    // 상품 수정
-    public ProductResponseDto updateProduct(Long id, ProductRequestDto requestDto, String userRole, Long userId) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
-
-        if (userRole.equals("CUSTOMER")) {
-            throw new AccessDeniedException("구매자는 상품을 수정할 수 없습니다.");
-        } else if (userRole.equals("OWNER") && !product.getStore().getOwnerId().equals(userId)) {
-            throw new AccessDeniedException("본인의 가게 상품만 수정할 수 있습니다.");
-        }
-
-        product.setName(requestDto.getName());
-        product.setDescription(requestDto.getDescription());
-        product.setPrice(requestDto.getPrice());
-        product.setStock(requestDto.getStock());
-        product.setStatus(ProductStatus.valueOf(requestDto.getStatus().toUpperCase()));
-
-        Product updatedProduct = productRepository.save(product);
-        return convertToDto(updatedProduct);
-    }
-
-    // 상품 삭제
-    public void deleteProduct(Long id, String userRole, Long userId) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
-
-        if (userRole.equals("CUSTOMER")) {
-            throw new AccessDeniedException("구매자는 상품을 삭제할 수 없습니다.");
-        } else if (userRole.equals("OWNER") && !product.getStore().getOwnerId().equals(userId)) {
-            throw new AccessDeniedException("본인의 가게 상품만 삭제할 수 있습니다.");
-        }
-
-        productRepository.deleteById(id);
-    }
-
-    // 상품 검색 (키워드로 검색)
+    // 상품 검색 (숨겨진 상품 제외)
     public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(
@@ -94,22 +59,49 @@ public class ProductService {
             );
         }
 
-        Page<Product> products = productRepository.findByNameContaining(keyword, pageable);
+        Page<Product> products = productRepository.findByNameContainingAndIsHiddenFalse(keyword, pageable);
         return products.map(this::convertToDto);
     }
 
-    // Product 엔티티를 ProductResponseDto로 변환
+    // 상품 삭제
+    public void deleteProduct(UUID id, String userRole, UUID userId) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+
+        if (!product.getStore().getMember().getUserId().equals(userId)) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+
+        productRepository.deleteById(id);
+    }
+
+    // 상품 숨김 상태 업데이트
+    public ProductResponseDto updateProductVisibility(UUID id, boolean isHidden, String userRole, UUID userId) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+
+        if (!userRole.equals("ADMIN") && (!userRole.equals("OWNER") || !product.getStore().getMember().getUserId().equals(userId))) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+
+        product.setHidden(isHidden);
+        Product updatedProduct = productRepository.save(product);
+
+        return convertToDto(updatedProduct);
+    }
+
     private ProductResponseDto convertToDto(Product product) {
         ProductResponseDto responseDto = new ProductResponseDto();
-        responseDto.setId(product.getId());
+        responseDto.setId(product.getProductId());
         responseDto.setName(product.getName());
         responseDto.setDescription(product.getDescription());
         responseDto.setPrice(product.getPrice());
-        responseDto.setStock(product.getStock());
         responseDto.setStatus(product.getStatus().name());
         responseDto.setStoreName(product.getStore().getName());
         responseDto.setCreatedAt(product.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        responseDto.setUpdatedAt(product.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        responseDto.setUpdatedAt(product.getUpdatedAt() != null
+                ? product.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                : null);
         return responseDto;
     }
 }

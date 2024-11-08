@@ -11,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 // 상품 관리를 위한 컨트롤러
 @RestController
 @RequestMapping("/api/products")
@@ -28,7 +30,7 @@ public class ProductController {
 
     // 상품 조회 (ID로 조회)
     @GetMapping("/{id}")
-    public ProductResponseDto getProduct(@PathVariable Long id) {
+    public ProductResponseDto getProduct(@PathVariable UUID id) {
         return productService.getProductById(id);
     }
 
@@ -36,11 +38,11 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PutMapping("/{id}")
     public ProductResponseDto updateProduct(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody @Valid ProductRequestDto requestDto,
             Authentication authentication) {
         String userRole = authentication.getAuthorities().iterator().next().getAuthority();
-        Long userId = Long.valueOf(authentication.getName());
+        UUID userId = UUID.fromString(authentication.getName());
         return productService.updateProduct(id, requestDto, userRole, userId);
     }
 
@@ -48,18 +50,30 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @DeleteMapping("/{id}")
     public void deleteProduct(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             Authentication authentication) {
         String userRole = authentication.getAuthorities().iterator().next().getAuthority();
-        Long userId = Long.valueOf(authentication.getName());
+        UUID userId = UUID.fromString(authentication.getName());
         productService.deleteProduct(id, userRole, userId);
     }
 
-    // 상품 검색 (키워드로 검색)
+    // 상품 검색 (키워드로 검색, 숨겨진 상품 제외)
     @GetMapping("/search")
     public Page<ProductResponseDto> searchProducts(
             @RequestParam String keyword,
             Pageable pageable) {
         return productService.searchProducts(keyword, pageable);
+    }
+
+    // 상품 숨김 상태 변경 (ADMIN, OWNER만 접근 가능)
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PatchMapping("/{id}/hide")
+    public ProductResponseDto hideProduct(
+            @PathVariable UUID id,
+            @RequestParam boolean isHidden,
+            Authentication authentication) {
+        String userRole = authentication.getAuthorities().iterator().next().getAuthority();
+        UUID userId = UUID.fromString(authentication.getName());
+        return productService.updateProductVisibility(id, isHidden, userRole, userId);
     }
 }
