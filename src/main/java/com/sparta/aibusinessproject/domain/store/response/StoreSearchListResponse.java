@@ -1,4 +1,4 @@
-package com.sparta.aibusinessproject.domain.store.dto;
+package com.sparta.aibusinessproject.domain.store.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StoreResponseDto {
+public class StoreSearchListResponse {
     private UUID storeId;
 
     private UUID userId;
