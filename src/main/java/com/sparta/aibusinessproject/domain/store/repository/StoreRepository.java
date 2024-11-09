@@ -4,9 +4,11 @@ import com.sparta.aibusinessproject.domain.store.entity.Store;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface StoreRepository extends JpaRepository<Store, UUID> {
+public interface StoreRepository extends JpaRepository<Store, UUID>,StoreRepositoryCustom {
+    Optional<Store> findByName(String storeName);
 
 }
