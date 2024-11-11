@@ -22,4 +22,9 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
         });
     }
 
+    default Member getByUsername(String username) {
+        return findByUsername(username).orElseThrow(() ->
+                new IllegalArgumentException(username + "에 해당하는 사용자가 없습니다.")
+        );
+    }
 }
