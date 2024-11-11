@@ -2,10 +2,12 @@ package com.sparta.aibusinessproject.domain.member.dto.response;
 
 import java.util.UUID;
 
-public record LoginResponse(
-        UUID id
+public record LoginResponse (
+        UUID id,
+        String accessToken,
+        String refreshToken
 ) {
-    public static LoginResponse from(UUID id) {
-        return new LoginResponse(id);
+    public static LoginResponse of(UUID id, String accessToken, String refreshToken) {
+        return new LoginResponse(id, accessToken, refreshToken);
     }
 }

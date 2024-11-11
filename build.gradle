@@ -32,8 +32,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // postgresql
+    // database
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     runtimeOnly 'org.postgresql:postgresql'
 
     // JWT

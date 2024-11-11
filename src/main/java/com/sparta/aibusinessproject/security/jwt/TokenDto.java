@@ -17,7 +17,7 @@ public class TokenDto {
     private String refreshToken;
     private Date expiredTime;
 
-    public static TokenDto from(String grantType, String accessToken, String refreshToken, Date expiredTime) {
+    public static TokenDto of(String grantType, String accessToken, String refreshToken, Date expiredTime) {
         return TokenDto.builder()
                 .grantType(grantType)
                 .accessToken(accessToken)
