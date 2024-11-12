@@ -57,7 +57,6 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.NOTFOUND_CATEGORY));
 
-
         // 카테고리 중복 검사
         if(categoryRepository.existsByName(request.name())){
             throw new ApplicationException(ErrorCode.DUPLICATED_CATEGORY);
@@ -65,8 +64,10 @@ public class CategoryService {
 
         category.update(request);
 
-        return CategoryListResponse.from(category);
+        // 카테고리 정보를 DB에 저장
+        return CategoryListResponse.from(categoryRepository.save(category));  // save 호출 추가
     }
+
 
     // 카테고리 삭제
     @Transactional
