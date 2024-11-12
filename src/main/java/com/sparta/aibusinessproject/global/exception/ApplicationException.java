@@ -5,18 +5,17 @@ import lombok.Getter;
 @Getter
 public class ApplicationException extends RuntimeException {
     private final ErrorCode errorCode;
-    private final String message;
 
-    public ApplicationException(ErrorCode errorCode) {
+    public ApplicationException(ErrorCode errorCode, String message) {
+        super(message); // RuntimeException의 message 필드 초기화
         this.errorCode = errorCode;
-        this.message = errorCode.getMessage();
     }
 
     @Override
     public String toString() {
-        return "UserException{" +
+        return "ApplicationException{" +
                 "errorCode=" + errorCode +
-                ", message='" + message + '\'' +
+                ", message='" + getMessage() + '\'' + // getMessage()로 변경
                 '}';
     }
 }
