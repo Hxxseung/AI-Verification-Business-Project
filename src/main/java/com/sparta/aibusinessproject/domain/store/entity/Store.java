@@ -3,6 +3,7 @@ package com.sparta.aibusinessproject.domain.store.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.lang.reflect.Member;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public class Store {
     private Member member;
 
     @PrePersist
-    protected void onCreate() {
+    public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.createdBy = UUID.randomUUID().toString();
         this.modifiedAt = LocalDateTime.now();
@@ -61,8 +62,17 @@ public class Store {
     }
 
     @PreUpdate
-    protected void onUpdate() {
+    public void onUpdate() {
         this.modifiedAt = LocalDateTime.now();
         this.modifiedBy = UUID.randomUUID().toString();
     }
+
+    public void updateStoreDetails(String name, String description, String address) {
+        this.name = name;
+        this.description = description;
+        this.address = address;
+        onUpdate();
+    }
+
+
 }
