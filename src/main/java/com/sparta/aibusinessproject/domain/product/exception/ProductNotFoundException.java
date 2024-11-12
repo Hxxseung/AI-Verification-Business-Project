@@ -5,7 +5,7 @@ import com.sparta.aibusinessproject.global.exception.ErrorCode;
 
 public class ProductNotFoundException extends ApplicationException {
 
-    public ProductNotFoundException() {
-        super(ErrorCode.PRODUCT_NOT_FOUND); // ErrorCode에 정의된 메시지와 상태를 사용
+    public ProductNotFoundException(String message) {
+        super(ErrorCode.PRODUCT_NOT_FOUND, message); // ErrorCode를 자동으로 설정
     }
 }
