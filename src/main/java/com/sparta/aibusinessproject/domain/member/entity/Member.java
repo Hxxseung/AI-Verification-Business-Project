@@ -24,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "members")
+@Table(name = "p_members")
 public class Member extends BaseEntity {
 
     @Id
