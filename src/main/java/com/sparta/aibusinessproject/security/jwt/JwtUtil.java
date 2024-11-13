@@ -90,20 +90,22 @@ public class JwtUtil {
     }
 
     // 토큰 검증
-    public boolean validateToken(String token) {
+    public TokenStatus validateToken(String token) {
+        // todo: ENUM 처리 필요
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (SecurityException | MalformedJwtException | SignatureException e) {
-            logger.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+            return TokenStatus.VALID;
         } catch (ExpiredJwtException e) {
             logger.error("Expired JWT token, 만료된 JWT token 입니다.");
+            return TokenStatus.EXPIRED;
+        } catch (SecurityException | MalformedJwtException | SignatureException e) {
+            logger.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
         } catch (UnsupportedJwtException e) {
             logger.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
-        return false;
+        return TokenStatus.INVALID;
     }
 
     public Authentication getAuthentication(String accessToken) {
