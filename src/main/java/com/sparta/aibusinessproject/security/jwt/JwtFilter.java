@@ -27,22 +27,31 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws IOException, ServletException {
 
+        String requestURI = request.getRequestURI();
+
+        // 특정 경로 필터링 제외
+        if (requestURI.startsWith("/auth/login") || requestURI.startsWith("/auth/signup")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 1. Request Header 에서 토큰을 꺼냄
         String jwt = resolveToken(request);
 
         // 2. validateToken 으로 토큰 유효성 검사
-        // todo: expiredException 처리 필요
-        if (StringUtils.hasText(jwt) && jwtUtil.validateToken(jwt)) {
+        if (jwt != null && jwtUtil.validateToken(jwt) == TokenStatus.VALID) {
             Authentication authentication = jwtUtil.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else if (jwt != null && jwtUtil.isTokenExpired(jwt)) {
+        } else if (jwt != null && jwtUtil.validateToken(jwt) == TokenStatus.EXPIRED) {
             // Access Token 만료 시 Refresh Token 확인
             String refreshToken = getRefreshTokenFromCookies(request);
 
-            if (StringUtils.hasText(refreshToken) && jwtUtil.validateToken(refreshToken)) {
-                // Refresh Token이 유효하면 새로운 Access Token 발급
+            // Refresh Token이 유효하면 새로운 Access Token 발급
+            if (refreshToken != null && jwtUtil.validateToken(refreshToken) == TokenStatus.VALID) {
                 String newAccessToken = jwtUtil.generateAccessTokenByRefreshToken(refreshToken);
                 response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + newAccessToken);
+            } else if (jwtUtil.validateToken(refreshToken) == TokenStatus.EXPIRED) {
+                // todo: Refresh Token 만료 상태
             }
         }
 
