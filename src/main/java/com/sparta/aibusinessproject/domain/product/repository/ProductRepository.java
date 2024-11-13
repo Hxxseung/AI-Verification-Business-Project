@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
-    Page<Product> findByNameContainingAndIsHiddenFalse(String keyword, Pageable pageable); // 숨겨진 상품 제외 검색
+    Page<Product> findByNameContainingAndHiddenFalse(String keyword, Pageable pageable);
 }

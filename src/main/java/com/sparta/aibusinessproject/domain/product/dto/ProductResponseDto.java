@@ -1,6 +1,7 @@
 package com.sparta.aibusinessproject.domain.product.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
 public class ProductResponseDto {
     private UUID id; // 상품 UUID
     private String name; // 상품 이름
