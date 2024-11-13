@@ -5,6 +5,8 @@ import com.sparta.aibusinessproject.domain.store.dto.request.StoreCreateRequest;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreSearchListRequest;
 import com.sparta.aibusinessproject.domain.store.entity.Store;
 import com.sparta.aibusinessproject.domain.store.repository.StoreRepository;
+import com.sparta.aibusinessproject.global.exception.ApplicationException;
+import com.sparta.aibusinessproject.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

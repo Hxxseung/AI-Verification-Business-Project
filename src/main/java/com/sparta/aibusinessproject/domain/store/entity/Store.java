@@ -1,5 +1,6 @@
 package com.sparta.aibusinessproject.domain.store.entity;
 
+import com.sparta.aibusinessproject.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
