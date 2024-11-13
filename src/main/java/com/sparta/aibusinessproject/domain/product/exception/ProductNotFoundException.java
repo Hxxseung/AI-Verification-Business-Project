@@ -6,6 +6,6 @@ import com.sparta.aibusinessproject.global.exception.ErrorCode;
 public class ProductNotFoundException extends ApplicationException {
 
     public ProductNotFoundException(String message) {
-        super(ErrorCode.PRODUCT_NOT_FOUND, message); // ErrorCode를 자동으로 설정
+        super(ErrorCode.PRODUCT_NOT_FOUND, message);
     }
 }

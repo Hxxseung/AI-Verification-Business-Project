@@ -6,6 +6,6 @@ import com.sparta.aibusinessproject.global.exception.ErrorCode;
 public class OrderNotFoundException extends ApplicationException {
 
     public OrderNotFoundException(String message) {
-        super(ErrorCode.ORDER_NOT_FOUND, message); // ErrorCode를 자동으로 설정
+        super(ErrorCode.ORDER_NOT_FOUND, message);
     }
 }
