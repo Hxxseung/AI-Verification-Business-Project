@@ -1,6 +1,7 @@
 package com.sparta.aibusinessproject.security.jwt;
 
-import com.sparta.aibusinessproject.domain.member.entity.MemberRole;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -10,39 +11,43 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Base64;
-import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    // Header KEY 값
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    // 사용자 권한 값의 KEY
-    public static final String AUTHORIZATION_KEY = "auth";
-    // Token 식별자
-    public static final String BEARER_PREFIX = "Bearer ";
-    // 토큰 만료시간
-    private final long TOKEN_TIME = 60 * 60 * 1000L; // 60분
+    public static final String AUTHORIZATION_HEADER = "Authorization"; // Header KEY 값
+    public static final String AUTHORIZATION_KEY = "auth"; // 사용자 권한 값의 KEY
+    public static final String BEARER_PREFIX = "Bearer "; // Token 식별자
+    private final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L; // 토큰 만료시간 30분
+    private final long REFRESH_TOKEN_EXPIRE_TIME = 10000 * 60 * 1000L; // 토큰 만료시간 10000분
 
     @Value("${jwt.secret.key}") // Base64 Encode 한 SecretKey
     private String secretKey;
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+    public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그"); // 로그 설정
 
-    // 로그 설정
-    public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
+    private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @PostConstruct
     public void init() {
@@ -50,63 +55,123 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    // 토큰 생성
-    public String createToken(String username, MemberRole role) {
-        Date date = new Date();
+    public TokenDto generateTokenDto(Authentication authentication) {
+        // 권한들 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
-        return BEARER_PREFIX +
-                Jwts.builder()
-                        .setSubject(username) // 사용자 식별자값(ID)
-                        .claim(AUTHORIZATION_KEY, role) // 사용자 권한
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
-                        .setIssuedAt(date) // 발급일
-                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘
-                        .compact();
+        String accessToken = generateAccessToken(authentication.getName(), authorities);
+        String refreshToken = generateRefreshToken(authentication.getName(), authorities);
+        long now = (new Date()).getTime();
+
+        return TokenDto.of(BEARER_PREFIX, accessToken, refreshToken, new Date(now + ACCESS_TOKEN_EXPIRE_TIME));
     }
 
-    // JWT Cookie 에 저장
-    public void addJwtToCookie(String token, HttpServletResponse res) {
-        try {
-            token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
-
-            Cookie cookie = new Cookie(AUTHORIZATION_HEADER, token); // Name-Value
-            cookie.setPath("/");
-
-            // Response 객체에 Cookie 추가
-            res.addCookie(cookie);
-        } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage());
-        }
+    private String generateAccessToken(String username, String authorities) {
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        return Jwts.builder()
+                .setSubject(username)
+                .claim(AUTHORIZATION_KEY, authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
 
-    // JWT 토큰 substring
-    public String substringToken(String tokenValue) {
-        if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
-        }
-        logger.error("Not Found Token");
-        throw new NullPointerException("Not Found Token");
+    private String generateRefreshToken(String username, String authorities) {
+        long now = (new Date()).getTime();
+        return Jwts.builder()
+                .setSubject(username)
+                .claim(AUTHORIZATION_KEY, authorities)
+                .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
+                .claim("isRefreshToken", true) // refreshToken 임을 나타내는 클레임 추가
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
 
     // 토큰 검증
-    public boolean validateToken(String token) {
+    public TokenStatus validateToken(String token) {
+        // todo: ENUM 처리 필요
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (SecurityException | MalformedJwtException | SignatureException e) {
-            logger.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+            return TokenStatus.VALID;
         } catch (ExpiredJwtException e) {
             logger.error("Expired JWT token, 만료된 JWT token 입니다.");
+            return TokenStatus.EXPIRED;
+        } catch (SecurityException | MalformedJwtException | SignatureException e) {
+            logger.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
         } catch (UnsupportedJwtException e) {
             logger.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
-        return false;
+        return TokenStatus.INVALID;
     }
 
-    // 토큰에서 사용자 정보 가져오기
-    public Claims getUserInfoFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    public Authentication getAuthentication(String accessToken) {
+        // 토큰 복호화
+        Claims claims = parseClaims(accessToken);
+        if (claims.get(AUTHORIZATION_KEY) == null) {
+            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+        }
+
+        // 클레임에서 권한 정보 가져오기
+        List<SimpleGrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORIZATION_KEY).toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+        // UserDetails 객체를 만들어서 Authentication 리턴
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
+
+    // 토큰이 만료되었는지 확인
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            Date expiration = claims.getExpiration();
+            return !expiration.before(new Date()); // 현재 시간과 비교
+        } catch (Exception e) {
+            return true; // 토큰 파싱 실패 시 만료된 것으로 간주
+        }
+    }
+
+    private Claims parseClaims(String accessToken) {
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
+    }
+
+    public String generateAccessTokenByRefreshToken(String refreshToken) throws JsonProcessingException {
+        // redis에서 refresh token 확인하고 refresh toekn 유효하면 access token 발급
+        Claims refreshClaims = parseClaims(refreshToken);
+        String username = refreshClaims.getSubject();
+
+        // 2. Redis에서 사용자 정보 조회
+        String userDataJson = (String) redisTemplate.opsForValue().get(username);
+        if (userDataJson == null) {
+            throw new IllegalArgumentException("No data found in Redis for user: " + username);
+        }
+
+        // 3. refresh token 검증
+        TokenDto userToken = objectMapper.readValue(userDataJson, TokenDto.class);
+
+        if (!refreshToken.equals(userToken.getRefreshToken()) || isTokenExpired(refreshToken)) {
+            throw new IllegalArgumentException("Invalid or expired Refresh Token");
+        }
+
+        // 5. 새로운 Access Token 생성
+        String authorities = refreshClaims.get(AUTHORIZATION_KEY, String.class);
+        String newAccessToken = generateAccessToken(username, authorities);
+        Claims accessClaims = parseClaims(newAccessToken);
+        TokenDto newUserToken = TokenDto.of(BEARER_PREFIX, newAccessToken, refreshToken, accessClaims.getExpiration());
+        redisTemplate.opsForValue().set(username, newUserToken);
+
+        return newAccessToken;
+    }
+
 }
