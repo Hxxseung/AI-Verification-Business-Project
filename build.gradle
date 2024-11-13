@@ -17,8 +17,13 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', "2023.0.2")
+    set('querydslVersion', "5.0.0")  // QueryDSL 버전 명시적으로 설정
+}
+
 dependencies {
-// Spring Boot Starters
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -45,22 +50,14 @@ dependencies {
 //    testImplementation 'org.springframework.security:spring-security-test'
 //    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-// MySQL
-    runtimeOnly 'com.mysql:mysql-connector-j'
-
-// PostgreSQL
-    runtimeOnly 'org.postgresql:postgresql:42.6.0'
-
-// Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-
-
 
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+def querydslSrcDir = 'src/main/generated'
+clean {
+    delete file(querydslSrcDir)
 }
