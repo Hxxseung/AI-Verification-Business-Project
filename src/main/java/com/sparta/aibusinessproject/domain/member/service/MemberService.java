@@ -2,6 +2,7 @@ package com.sparta.aibusinessproject.domain.member.service;
 
 import com.sparta.aibusinessproject.domain.member.dto.request.LoginRequest;
 import com.sparta.aibusinessproject.domain.member.dto.request.SignupRequest;
+import com.sparta.aibusinessproject.domain.member.dto.request.modifyMemberInfoRequest;
 import com.sparta.aibusinessproject.domain.member.dto.response.LoginResponse;
 import com.sparta.aibusinessproject.domain.member.dto.response.MemberInfoResponse;
 import com.sparta.aibusinessproject.domain.member.dto.response.SignupResponse;
@@ -49,5 +50,13 @@ public class MemberService {
     public MemberInfoResponse getMemberInfo(String username) {
         Member member = memberRepository.getByUsername(username);
         return MemberInfoResponse.from(member);
+    }
+
+    public MemberInfoResponse modifyMemberInfo(modifyMemberInfoRequest request) {
+        Member updateMember = memberRepository.getByUsername(request.username());
+        updateMember.update(request, passwordEncoder);
+        memberRepository.save(updateMember);
+
+        return MemberInfoResponse.from(updateMember);
     }
 }

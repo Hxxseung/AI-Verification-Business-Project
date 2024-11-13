@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, UUID> {
     Optional<Member> findByUsername(String username);
-
     Optional<Member> findByEmail(String email);
 
     default void checkDuplicatedUsername(String username) {
