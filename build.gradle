@@ -18,15 +18,24 @@ repositories {
 }
 
 dependencies {
-// Spring Boot Starters
+    // spring boot
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation' // 추가
 
-// Thymeleaf Security Extras
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    // spring security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // database
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    runtimeOnly 'org.postgresql:postgresql'
 
 // JWT
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
@@ -39,14 +48,6 @@ dependencies {
 // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    //    runtimeOnly 'com.mysql:mysql-connector-j'
-//    annotationProcessor 'org.projectlombok:lombok'
-//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//    testImplementation 'org.springframework.security:spring-security-test'
-//    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-// MySQL
-    runtimeOnly 'com.mysql:mysql-connector-j'
 
 // PostgreSQL
     runtimeOnly 'org.postgresql:postgresql:42.6.0'
@@ -55,8 +56,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-
 
 
 }

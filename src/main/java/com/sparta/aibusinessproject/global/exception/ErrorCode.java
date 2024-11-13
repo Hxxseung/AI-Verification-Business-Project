@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @Getter
 public enum ErrorCode {
+    AUTHENTICATION_FAIL(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.")
     //여기에 ErrorMessage 넣어서 쓰면 됩니다
     //ex) INVALID_STORE(HttpStatus.NOT_FOUND, "가게 정보가 없습니다.")
     INVALID_PASSWORD(HttpStatus.NOT_FOUND, "패스워드가 잘못되었습니다."),
@@ -19,4 +20,6 @@ public enum ErrorCode {
     DEFAULT_VALUE(HttpStatus.BAD_REQUEST, "기본 카테고리 종류 이므로 변경이 불가능합니다.");
     private HttpStatus status;
     private String message;
+
+
 }
