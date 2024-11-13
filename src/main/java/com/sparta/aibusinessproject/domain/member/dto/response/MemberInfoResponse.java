@@ -6,6 +6,7 @@ import java.util.UUID;
 public record MemberInfoResponse(
         UUID id,
         String username,
+        String nickname,
         String email,
         String phone,
         String address,
@@ -15,6 +16,7 @@ public record MemberInfoResponse(
         return new MemberInfoResponse(
                 member.getId(),
                 member.getUsername(),
+                member.getNickname(),
                 member.getEmail(),
                 member.getPhone(),
                 member.getAddress(),
