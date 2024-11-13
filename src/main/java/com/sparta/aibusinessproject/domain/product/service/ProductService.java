@@ -46,7 +46,7 @@ public class ProductService {
     // 상품 조회 (ID로 조회)
     public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
         return convertToDto(product);
     }
 
@@ -67,7 +67,7 @@ public class ProductService {
     // 상품 삭제
     public void deleteProduct(UUID id, String userRole, UUID userId) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
         if (!product.getStore().getMember().getUserId().equals(userId)) {
             throw new AccessDeniedException("권한이 없습니다.");
@@ -79,7 +79,7 @@ public class ProductService {
     // 상품 숨김 상태 업데이트
     public ProductResponseDto updateProductVisibility(UUID id, boolean isHidden, String userRole, UUID userId) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
         if (!userRole.equals("ADMIN") && (!userRole.equals("OWNER") || !product.getStore().getMember().getUserId().equals(userId))) {
             throw new AccessDeniedException("권한이 없습니다.");
@@ -94,7 +94,7 @@ public class ProductService {
     // 상품 정보 업데이트
     public ProductResponseDto updateProduct(UUID id, @Valid ProductRequestDto requestDto, String userRole, UUID userId) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
         if (!userRole.equals("ADMIN") && (!userRole.equals("OWNER") || !product.getStore().getMember().getUserId().equals(userId))) {
             throw new AccessDeniedException("본인의 가게 상품만 수정할 수 있습니다.");
