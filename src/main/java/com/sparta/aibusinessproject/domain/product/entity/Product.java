@@ -1,5 +1,6 @@
 package com.sparta.aibusinessproject.domain.product.entity;
 
+import com.sparta.aibusinessproject.domain.store.entity.Store;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
