@@ -42,10 +42,15 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private String phone;
+
     @Email
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String address;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
@@ -56,7 +61,9 @@ public class Member extends BaseEntity {
                 .username(request.username())
                 .nickname(request.nickname())
                 .password(passwordEncoder.encode(request.password()))
+                .phone(request.phone())
                 .email(request.email())
+                .address(request.address())
                 .role(request.role())
                 .build();
     }
