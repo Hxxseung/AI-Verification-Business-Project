@@ -7,6 +7,8 @@ import com.sparta.aibusinessproject.domain.product.entity.ProductStatus;
 import com.sparta.aibusinessproject.domain.product.exception.ProductNotFoundException;
 import com.sparta.aibusinessproject.domain.product.exception.StoreNotFoundException;
 import com.sparta.aibusinessproject.domain.product.repository.ProductRepository;
+import com.sparta.aibusinessproject.domain.store.entity.Store;
+import com.sparta.aibusinessproject.domain.store.repository.StoreRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,28 +31,28 @@ public class ProductService {
     // 상품 생성
     public ProductResponseDto createProduct(ProductRequestDto requestDto) {
         Store store = storeRepository.findById(UUID.fromString(requestDto.getStoreId()))
-                .orElseThrow(StoreNotFoundException::new);
+                .orElseThrow(() -> new StoreNotFoundException("Store not found"));
 
         Product product = new Product();
         product.setName(requestDto.getName());
         product.setDescription(requestDto.getDescription());
         product.setPrice(requestDto.getPrice());
-        product.setHidden(false); // 기본 숨김 상태: false
-        product.setStatus(ProductStatus.AVAILABLE); // 기본 상태 설정
+        product.setHidden(false);
+        product.setStatus(ProductStatus.AVAILABLE);
         product.setStore(store);
 
         Product savedProduct = productRepository.save(product);
         return convertToDto(savedProduct);
     }
 
-    // 상품 조회 (ID로 조회)
+    // 상품 조회
     public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
         return convertToDto(product);
     }
 
-    // 상품 검색 (숨겨진 상품 제외)
+    // 상품 검색
     public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(
@@ -60,7 +62,7 @@ public class ProductService {
             );
         }
 
-        Page<Product> products = productRepository.findByNameContainingAndIsHiddenFalse(keyword, pageable);
+        Page<Product> products = productRepository.findByNameContainingAndHiddenFalse(keyword, pageable);
         return products.map(this::convertToDto);
     }
 
@@ -69,9 +71,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        if (!product.getStore().getMember().getUserId().equals(userId)) {
-            throw new AccessDeniedException("권한이 없습니다.");
-        }
+        validateUserAccess(product.getStore().getStoreId(), userRole, userId);
 
         productRepository.deleteById(id);
     }
@@ -81,9 +81,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        if (!userRole.equals("ADMIN") && (!userRole.equals("OWNER") || !product.getStore().getMember().getUserId().equals(userId))) {
-            throw new AccessDeniedException("권한이 없습니다.");
-        }
+        validateUserAccess(product.getStore().getStoreId(), userRole, userId);
 
         product.setHidden(isHidden);
         Product updatedProduct = productRepository.save(product);
@@ -96,31 +94,45 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        if (!userRole.equals("ADMIN") && (!userRole.equals("OWNER") || !product.getStore().getMember().getUserId().equals(userId))) {
-            throw new AccessDeniedException("본인의 가게 상품만 수정할 수 있습니다.");
-        }
+        validateUserAccess(product.getStore().getStoreId(), userRole, userId);
 
         product.setName(requestDto.getName());
         product.setDescription(requestDto.getDescription());
         product.setPrice(requestDto.getPrice());
-        product.setStatus(ProductStatus.AVAILABLE); // 기본 값으로 AVAILABLE 설정
+        product.setStatus(ProductStatus.AVAILABLE);
 
         Product updatedProduct = productRepository.save(product);
         return convertToDto(updatedProduct);
     }
 
+    // 권한 검증 메서드
+    private void validateUserAccess(UUID storeId, String userRole, UUID userId) {
+        if (userRole.equals("ADMIN")) {
+            return; // ADMIN은 모든 권한이 있으므로 검증 생략
+        }
+
+        UUID storeUserId = storeRepository.findById(storeId)
+                .map(Store::getUserId)
+                .orElseThrow(() -> new StoreNotFoundException("Store not found"));
+
+        if (!userRole.equals("OWNER") || !storeUserId.equals(userId)) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+    }
+
+    // DTO 변환
     private ProductResponseDto convertToDto(Product product) {
-        ProductResponseDto responseDto = new ProductResponseDto();
-        responseDto.setId(product.getProductId());
-        responseDto.setName(product.getName());
-        responseDto.setDescription(product.getDescription());
-        responseDto.setPrice(product.getPrice());
-        responseDto.setStatus(product.getStatus().name());
-        responseDto.setStoreName(product.getStore().getName());
-        responseDto.setCreatedAt(product.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        responseDto.setUpdatedAt(product.getUpdatedAt() != null
-                ? product.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                : null);
-        return responseDto;
+        return ProductResponseDto.builder()
+                .id(product.getProductId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .status(product.getStatus().name())
+                .storeName(product.getStore().getName())
+                .createdAt(product.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .updatedAt(product.getUpdatedAt() != null
+                        ? product.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                        : null)
+                .build();
     }
 }
