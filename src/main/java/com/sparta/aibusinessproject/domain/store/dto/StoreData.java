@@ -15,7 +15,8 @@ public record StoreData(
         String createdBy,
         String modifiedBy,
         String deletedBy,
-        UUID userID
+        UUID userID,
+        UUID storeID
 
 
 ) {
@@ -33,6 +34,7 @@ public record StoreData(
                 .modifiedBy(data.modifiedBy)
                 .deletedBy(data.deletedBy)
                 .userId(data.userID)
+                .storeId(data.storeID)
                 .build();
     }
 
@@ -48,6 +50,7 @@ public record StoreData(
                 .modifiedBy(store.getModifiedBy())
                 .modifiedBy(store.getDeletedBy())
                 .userID(store.getUserId())
+                .storeID(store.getStoreId())
                 .build();
     }
     }
