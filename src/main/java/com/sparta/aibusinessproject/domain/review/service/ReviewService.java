@@ -19,4 +19,8 @@ public class ReviewService {
         Review review = reviewRepository.save(Review.create(request, order));
         return review.getId();
     }
+
+    public Review getReview(UUID id) {
+        return reviewRepository.getById(id);
+    }
 }
