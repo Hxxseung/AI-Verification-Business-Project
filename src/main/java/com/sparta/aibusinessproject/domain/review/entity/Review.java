@@ -3,6 +3,7 @@ package com.sparta.aibusinessproject.domain.review.entity;
 import com.sparta.aibusinessproject.domain.member.entity.BaseEntity;
 import com.sparta.aibusinessproject.domain.order.entity.Orders;
 import com.sparta.aibusinessproject.domain.review.dto.request.CreateReviewRequest;
+import com.sparta.aibusinessproject.domain.review.dto.request.ModifyReviewRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -51,6 +53,11 @@ public class Review extends BaseEntity {
                 .score(request.score())
                 .contents(request.contents())
                 .build();
+    }
+
+    public void update(ModifyReviewRequest request) {
+        Optional.ofNullable(request.contents()).ifPresent(value -> this.contents = value);
+        Optional.ofNullable(request.score()).ifPresent(value -> this.score = value);
     }
 
 }
