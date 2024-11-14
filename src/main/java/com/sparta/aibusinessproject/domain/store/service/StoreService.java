@@ -3,8 +3,11 @@ package com.sparta.aibusinessproject.domain.store.service;
 import com.sparta.aibusinessproject.domain.store.dto.StoreData;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreCreateRequest;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreSearchListRequest;
+import com.sparta.aibusinessproject.domain.store.dto.request.StoreUpdateRequest;
 import com.sparta.aibusinessproject.domain.store.entity.Store;
 import com.sparta.aibusinessproject.domain.store.repository.StoreRepository;
+import com.sparta.aibusinessproject.global.exception.ApplicationException;
+import com.sparta.aibusinessproject.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,9 +39,10 @@ public class StoreService {
         }
     }
 
-    // 가게 리스트 출력
-    public Page<com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchListResponse> getStores(StoreSearchListRequest searchDto, Pageable pageable) {
-        return storeRepository.searchStores(searchDto, pageable);
+    @Transactional
+    public Page<StoreData> getAllStores(Pageable pageable) {
+        Page<Store> stores = storeRepository.findAll(pageable);
+        return stores.map(StoreData::from); // Store 엔티티를 DTO로 변환하여 반환
     }
 
     // 가게 세부 조회
@@ -52,11 +56,11 @@ public class StoreService {
 
     // 가게 수정
     @Transactional
-    public StoreData update(UUID storeId, com.sparta.aibusinessproject.domain.store.dto.request.StoreUpdateRequest request) {
+    public StoreData update(UUID storeId, StoreUpdateRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_STORE));
 
-        store.update(request);
+        store.onUpdate();
 
         return  StoreData.from(store);
     }
