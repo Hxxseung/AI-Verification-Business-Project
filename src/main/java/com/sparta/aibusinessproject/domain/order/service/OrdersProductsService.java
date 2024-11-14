@@ -11,6 +11,7 @@ import com.sparta.aibusinessproject.domain.product.repository.ProductRepository;
 import com.sparta.aibusinessproject.domain.product.exception.ProductNotFoundException;
 import com.sparta.aibusinessproject.domain.order.exception.OrderNotFoundException;
 import com.sparta.aibusinessproject.global.util.OrdersProductsConverter;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class OrdersProductsService {
     private final OrdersRepository ordersRepository;
     private final ProductRepository productRepository;
 
+    @Transactional
     public OrdersProductsResponseDto createOrderProduct(OrdersProductsRequestDto requestDto) {
         // Order 및 Product 유효성 검증 및 조회
         Orders order = ordersRepository.findById(requestDto.getOrderId())
