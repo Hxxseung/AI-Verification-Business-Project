@@ -25,7 +25,7 @@ public class BaseEntity {
 
     private UUID modifiedBy;
 
-    private LocalDateTime deletedAt;
+    protected LocalDateTime deletedAt;
 
     private UUID deletedBy;
 }

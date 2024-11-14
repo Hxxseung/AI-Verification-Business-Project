@@ -2,7 +2,7 @@ package com.sparta.aibusinessproject.domain.member.service;
 
 import com.sparta.aibusinessproject.domain.member.dto.request.LoginRequest;
 import com.sparta.aibusinessproject.domain.member.dto.request.SignupRequest;
-import com.sparta.aibusinessproject.domain.member.dto.request.modifyMemberInfoRequest;
+import com.sparta.aibusinessproject.domain.member.dto.request.ModifyMemberInfoRequest;
 import com.sparta.aibusinessproject.domain.member.dto.response.LoginResponse;
 import com.sparta.aibusinessproject.domain.member.dto.response.MemberInfoResponse;
 import com.sparta.aibusinessproject.domain.member.dto.response.SignupResponse;
@@ -10,6 +10,7 @@ import com.sparta.aibusinessproject.domain.member.entity.Member;
 import com.sparta.aibusinessproject.domain.member.repository.MemberRepository;
 import com.sparta.aibusinessproject.security.jwt.JwtUtil;
 import com.sparta.aibusinessproject.security.jwt.TokenDto;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,11 +53,19 @@ public class MemberService {
         return MemberInfoResponse.from(member);
     }
 
-    public MemberInfoResponse modifyMemberInfo(modifyMemberInfoRequest request) {
+    public MemberInfoResponse modifyMemberInfo(ModifyMemberInfoRequest request) {
         Member updateMember = memberRepository.getByUsername(request.username());
         updateMember.update(request, passwordEncoder);
         memberRepository.save(updateMember);
 
         return MemberInfoResponse.from(updateMember);
+    }
+
+    public UUID deleteMember(String username) {
+        Member member = memberRepository.getByUsername(username);
+        member.delete();
+        memberRepository.save(member);
+
+        return member.getId();
     }
 }

@@ -2,9 +2,8 @@ package com.sparta.aibusinessproject.domain.member.dto.request;
 
 import com.sparta.aibusinessproject.domain.member.entity.MemberRole;
 import jakarta.validation.constraints.Pattern;
-import java.util.UUID;
 
-public record modifyMemberInfoRequest (
+public record ModifyMemberInfoRequest(
         @Pattern(regexp = "^[a-z0-9]{4,10}$",
                 message = "아이디는 영문 소문자 및 숫자 4~10자리여야 합니다.")
         String username,
