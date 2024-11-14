@@ -26,7 +26,7 @@ public class Orders {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus status; // ENUM 타입으로 변경
+    private OrderStatus status;
 
     @Column(nullable = false)
     private int totalPrice;
