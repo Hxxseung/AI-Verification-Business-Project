@@ -25,6 +25,7 @@ public class ReviewService {
     }
 
     public Review getReview(UUID id) {
+
         return reviewRepository.getById(id);
     }
 
@@ -36,6 +37,17 @@ public class ReviewService {
         }
 
         review.update(request);
+        return reviewRepository.save(review);
+    }
+
+    public Review deleteReview(String username, UUID reviewId) {
+        Review review = reviewRepository.getById(reviewId);
+        Member member = memberRepository.getByUsername(username);
+        if (!review.getOrder().getUserId().equals(member.getId())) {
+            throw new IllegalArgumentException();
+        }
+
+        review.delete();
         return reviewRepository.save(review);
     }
 }

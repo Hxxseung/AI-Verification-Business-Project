@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -58,6 +59,11 @@ public class Review extends BaseEntity {
     public void update(ModifyReviewRequest request) {
         Optional.ofNullable(request.contents()).ifPresent(value -> this.contents = value);
         Optional.ofNullable(request.score()).ifPresent(value -> this.score = value);
+    }
+
+    public void delete() {
+        // todo: soft delete에 대한 고민 필요
+        this.deletedAt = LocalDateTime.now();
     }
 
 }
