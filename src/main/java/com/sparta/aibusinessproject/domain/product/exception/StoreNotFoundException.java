@@ -5,7 +5,8 @@ import com.sparta.aibusinessproject.global.exception.ErrorCode;
 
 public class StoreNotFoundException extends ApplicationException {
 
-    public StoreNotFoundException(String message) {
-        super(ErrorCode.STORE_NOT_FOUND, message); // super로 메시지와 에러코드 전달
+    // ErrorCode만 전달하도록 수정
+    public StoreNotFoundException() {
+        super(ErrorCode.STORE_NOT_FOUND);
     }
 }

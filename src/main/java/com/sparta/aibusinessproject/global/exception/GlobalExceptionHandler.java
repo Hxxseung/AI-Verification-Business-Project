@@ -8,20 +8,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApplicationException.class)
-    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException ex) {
+    public ResponseEntity<Response<ErrorResponse>> handleApplicationException(ApplicationException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, ex.getErrorCode().getStatus());
-    }
-
-    @ExceptionHandler(NotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(NotValidException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.INVALID_REQUEST, ex.getMessage());
-        return new ResponseEntity<>(errorResponse, ErrorCode.INVALID_REQUEST.getStatus());
+        return new ResponseEntity<>(Response.error(errorResponse), ex.getErrorCode().getStatus());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
+    public ResponseEntity<Response<ErrorResponse>> handleGeneralException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(ErrorCode.INVALID_REQUEST, ex.getMessage());
-        return new ResponseEntity<>(errorResponse, ErrorCode.INVALID_REQUEST.getStatus());
+        return new ResponseEntity<>(Response.error(errorResponse), ErrorCode.INVALID_REQUEST.getStatus());
     }
 }

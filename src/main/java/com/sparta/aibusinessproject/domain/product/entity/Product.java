@@ -1,5 +1,6 @@
 package com.sparta.aibusinessproject.domain.product.entity;
 
+import com.sparta.aibusinessproject.domain.store.entity.Store;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -34,7 +35,7 @@ public class Product {
     private int price; // 상품 가격
 
     @Column(nullable = false)
-    private boolean isHidden; // 숨김 여부
+    private boolean hidden; // 숨김 여부
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
