@@ -31,7 +31,7 @@ public class ProductService {
     // 상품 생성
     public ProductResponseDto createProduct(ProductRequestDto requestDto) {
         Store store = storeRepository.findById(UUID.fromString(requestDto.getStoreId()))
-                .orElseThrow(() -> new StoreNotFoundException("Store not found"));
+                .orElseThrow(StoreNotFoundException::new); // 메시지 제거
 
         Product product = new Product();
         product.setName(requestDto.getName());
@@ -48,7 +48,7 @@ public class ProductService {
     // 상품 조회
     public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
         return convertToDto(product);
     }
 
@@ -69,17 +69,16 @@ public class ProductService {
     // 상품 삭제
     public void deleteProduct(UUID id, String userRole, UUID userId) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
 
         validateUserAccess(product.getStore().getStoreId(), userRole, userId);
-
         productRepository.deleteById(id);
     }
 
     // 상품 숨김 상태 업데이트
     public ProductResponseDto updateProductVisibility(UUID id, boolean isHidden, String userRole, UUID userId) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
 
         validateUserAccess(product.getStore().getStoreId(), userRole, userId);
 
@@ -92,7 +91,7 @@ public class ProductService {
     // 상품 정보 업데이트
     public ProductResponseDto updateProduct(UUID id, @Valid ProductRequestDto requestDto, String userRole, UUID userId) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
 
         validateUserAccess(product.getStore().getStoreId(), userRole, userId);
 
@@ -113,7 +112,7 @@ public class ProductService {
 
         UUID storeUserId = storeRepository.findById(storeId)
                 .map(Store::getUserId)
-                .orElseThrow(() -> new StoreNotFoundException("Store not found"));
+                .orElseThrow(StoreNotFoundException::new); // 메시지 제거
 
         if (!userRole.equals("OWNER") || !storeUserId.equals(userId)) {
             throw new AccessDeniedException("권한이 없습니다.");

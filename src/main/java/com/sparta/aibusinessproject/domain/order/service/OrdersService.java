@@ -20,8 +20,8 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
 
+    // 주문 생성
     public OrdersResponseDto createOrder(OrdersRequestDto requestDto) {
-        // 주문 생성 로직
         Orders order = new Orders();
         order.setUserId(requestDto.getUserId());
         order.setStoreId(requestDto.getStoreId());
@@ -33,40 +33,40 @@ public class OrdersService {
         return OrdersConverter.convertToDto(savedOrder);
     }
 
+    // 주문 소프트 삭제
     @Transactional
     public void softDeleteOrder(UUID id, Long userId) {
-        // 주문 소프트 삭제
-        Orders order = ordersRepository.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + id));
+        Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(OrderNotFoundException::new); // 존재하지 않으면 예외 발생
 
-        order.setDeletedAt(LocalDateTime.now());
-        order.setDeletedBy(userId);
-        ordersRepository.save(order); // 상태 업데이트
+        order.setDeletedAt(LocalDateTime.now()); // 삭제 시간 설정
+        order.setDeletedBy(userId); // 삭제한 사용자 ID 설정
+        ordersRepository.save(order);
     }
 
+    // 주문 단일 조회
     public OrdersResponseDto getOrderById(UUID id) {
-        // 주문 단일 조회
         Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + id));
+                .orElseThrow(OrderNotFoundException::new); // 존재하지 않으면 예외 발생
         return OrdersConverter.convertToDto(order);
     }
 
+    // 모든 주문 조회 (소프트 삭제되지 않은 주문만)
     public List<OrdersResponseDto> getAllOrders() {
-        // 소프트 삭제되지 않은 모든 주문 조회
         return ordersRepository.findAllByDeletedAtIsNull().stream()
                 .map(OrdersConverter::convertToDto)
                 .toList();
     }
 
+    // 주문 업데이트
     @Transactional
     public OrdersResponseDto updateOrder(UUID id, OrdersRequestDto requestDto) {
-        // 주문 업데이트
         Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + id));
+                .orElseThrow(OrderNotFoundException::new); // 존재하지 않으면 예외 발생
 
-        order.setStatus(requestDto.getStatus());
-        order.setTotalPrice(requestDto.getTotalPrice());
-        order.setDetail(requestDto.getDetail());
+        order.setStatus(requestDto.getStatus()); // 상태 업데이트
+        order.setTotalPrice(requestDto.getTotalPrice()); // 총 금액 업데이트
+        order.setDetail(requestDto.getDetail()); // 상세 정보 업데이트
         Orders updatedOrder = ordersRepository.save(order);
 
         return OrdersConverter.convertToDto(updatedOrder);

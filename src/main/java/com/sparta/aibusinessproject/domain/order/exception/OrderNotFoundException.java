@@ -5,7 +5,7 @@ import com.sparta.aibusinessproject.global.exception.ErrorCode;
 
 public class OrderNotFoundException extends ApplicationException {
 
-    public OrderNotFoundException(String message) {
-        super(ErrorCode.ORDER_NOT_FOUND, message);
+    public OrderNotFoundException() {
+        super(ErrorCode.ORDER_NOT_FOUND); // ErrorCode만 전달
     }
 }
