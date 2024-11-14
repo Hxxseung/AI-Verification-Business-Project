@@ -1,8 +1,7 @@
 package com.sparta.aibusinessproject.domain.member.entity;
 
 import com.sparta.aibusinessproject.domain.member.dto.request.SignupRequest;
-import com.sparta.aibusinessproject.domain.member.dto.request.modifyMemberInfoRequest;
-import com.sparta.aibusinessproject.domain.member.dto.response.MemberInfoResponse;
+import com.sparta.aibusinessproject.domain.member.dto.request.ModifyMemberInfoRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,15 +11,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
@@ -73,13 +71,22 @@ public class Member extends BaseEntity {
     }
 
     public void update(
-            modifyMemberInfoRequest request,
+            ModifyMemberInfoRequest request,
             PasswordEncoder passwordEncoder) {
         Optional.ofNullable(request.nickname()).ifPresent(value -> this.nickname = value);
         Optional.ofNullable(request.password()).ifPresent(value -> this.password = passwordEncoder.encode(value));
         Optional.ofNullable(request.phone()).ifPresent(value -> this.phone = value);
         Optional.ofNullable(request.email()).ifPresent(value -> this.email = value);
         Optional.ofNullable(request.address()).ifPresent(value -> this.address = value);
+    }
+
+    public void delete() {
+        // 회원 탈퇴 -> 개인정보 삭제
+        this.nickname = "deleted";
+        this.address = "-";
+        this.phone = "-";
+        this.email = "abc@sparta.com";
+        this.deletedAt = LocalDateTime.now();
     }
 
 }
