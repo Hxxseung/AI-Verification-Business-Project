@@ -10,7 +10,7 @@ public record GetReviewResponse (
         String contents,
         Integer score
 ) {
-    public static GetReviewResponse of(Review review) {
+    public static GetReviewResponse from(Review review) {
         return new GetReviewResponse(
                 review.getId(),
                 review.getOrder().getOrderId(),
