@@ -3,7 +3,6 @@ package com.sparta.aibusinessproject.domain.store.controller;
 
 import com.sparta.aibusinessproject.domain.store.dto.StoreData;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreCreateRequest;
-import com.sparta.aibusinessproject.domain.store.dto.request.StoreSearchListRequest;
 import com.sparta.aibusinessproject.domain.store.service.StoreService;
 import com.sparta.aibusinessproject.global.exception.Response;
 import lombok.RequiredArgsConstructor;
