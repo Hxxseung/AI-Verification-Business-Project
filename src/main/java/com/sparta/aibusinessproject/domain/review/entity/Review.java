@@ -2,6 +2,7 @@ package com.sparta.aibusinessproject.domain.review.entity;
 
 import com.sparta.aibusinessproject.domain.member.entity.BaseEntity;
 import com.sparta.aibusinessproject.domain.order.entity.Orders;
+import com.sparta.aibusinessproject.domain.review.dto.request.CreateReviewRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,12 +16,16 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(name = "p_reviews")
 public class Review extends BaseEntity {
 
@@ -38,6 +43,14 @@ public class Review extends BaseEntity {
     private Integer score;
 
     @Size(max = 255, message = "리뷰는 255자를 초과할 수 없습니다")
-    private String description;
+    private String contents;
+
+    public static Review create(CreateReviewRequest request, Orders order) {
+        return Review.builder()
+                .order(order)
+                .score(request.score())
+                .contents(request.contents())
+                .build();
+    }
 
 }

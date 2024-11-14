@@ -1,6 +1,8 @@
 package com.sparta.aibusinessproject.domain.order.repository;
 
 import com.sparta.aibusinessproject.domain.order.entity.Orders;
+import com.sparta.aibusinessproject.domain.order.exception.OrderNotFoundException;
+import com.sparta.aibusinessproject.global.exception.ErrorCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -15,4 +17,8 @@ public interface OrdersRepository extends JpaRepository<Orders, UUID> {
 
     @Query("SELECT o FROM Orders o WHERE o.orderId = :id AND o.deletedAt IS NULL")
     Optional<Orders> findByIdAndDeletedAtIsNull(UUID id);
+
+    default Orders getById(UUID id) {
+        return findById(id).orElseThrow(OrderNotFoundException::new);
+    }
 }
