@@ -3,6 +3,8 @@ package com.sparta.aibusinessproject.domain.store.dto;
 import com.sparta.aibusinessproject.domain.store.entity.Store;
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record StoreData(
         String name,
@@ -12,7 +14,8 @@ public record StoreData(
         String status,
         String createdBy,
         String modifiedBy,
-        String deletedBy
+        String deletedBy,
+        UUID userID
 
 
 ) {
@@ -29,6 +32,7 @@ public record StoreData(
                 .createdBy(data.createdBy)
                 .modifiedBy(data.modifiedBy)
                 .deletedBy(data.deletedBy)
+                .userId(data.userID)
                 .build();
     }
 
@@ -43,6 +47,7 @@ public record StoreData(
                 .createdBy(store.getCreatedBy())
                 .modifiedBy(store.getModifiedBy())
                 .modifiedBy(store.getDeletedBy())
+                .userID(store.getUserId())
                 .build();
     }
     }

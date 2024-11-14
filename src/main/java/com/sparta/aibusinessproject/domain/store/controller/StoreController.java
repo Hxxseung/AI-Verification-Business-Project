@@ -2,10 +2,10 @@ package com.sparta.aibusinessproject.domain.store.controller;
 
 
 import com.sparta.aibusinessproject.domain.store.dto.StoreData;
-import com.sparta.aibusinessproject.global.exception.Response;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreCreateRequest;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreSearchListRequest;
 import com.sparta.aibusinessproject.domain.store.service.StoreService;
+import com.sparta.aibusinessproject.global.exception.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,16 +28,17 @@ public class StoreController {
         return  Response.success("가게 생성에 성공하였습니다");
     }
 
-    // 가게 상세 조회
+    // 전체 가게 조회
+    @GetMapping
+    public Response<Page<StoreData>> getAllStores(Pageable pageable) {
+        Page<StoreData> stores = storeService.getAllStores(pageable);
+        return Response.success(stores);
+    }
+
+    // 가게 조회
     @GetMapping("/{storeId}")
     public Response<com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchResponse> getStore(@PathVariable UUID storeId) {
         return Response.success(storeService.getStoreById(storeId));
-    }
-
-    // 가게 리스트 전부 출력
-    @GetMapping
-    public Response<Page<com.sparta.aibusinessproject.domain.store.dto.response.StoreSearchListResponse>> getAllStores(@RequestBody StoreSearchListRequest searchDto, Pageable pageable) {
-        return Response.success(storeService.getStores(searchDto,pageable));
     }
 
     // 가게 수정
