@@ -2,6 +2,8 @@ package com.sparta.aibusinessproject.domain.store.dto.request;
 
 import com.sparta.aibusinessproject.domain.store.dto.StoreData;
 
+import java.util.UUID;
+
 public record StoreCreateRequest(
         String name,
         String address,
@@ -11,7 +13,8 @@ public record StoreCreateRequest(
         String createdBy,
         String modifiedBy,
         String deletedBy,
-        String category
+        String category,
+        UUID userId
 ) {
 
     // request -> dto
@@ -25,6 +28,7 @@ public record StoreCreateRequest(
                 .createdBy(request.createdBy())
                 .modifiedBy(request.modifiedBy())
                 .deletedBy(request.deletedBy())
+                .userID(request.userId())
                 .build();
     }
 }

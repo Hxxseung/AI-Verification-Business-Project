@@ -19,8 +19,7 @@ public class Store {
     @Column(updatable = false, nullable = false)
     private UUID storeId;
 
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false)
     private UUID userId;
 
     @Column(nullable = false)
@@ -48,12 +47,12 @@ public class Store {
     private LocalDateTime deletedAt;
     private String deletedBy;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Member member;
-
+    // 기본값 설정 (생성자에서)
     @PrePersist
     protected void onCreate() {
+        if (this.category == null || this.category.isEmpty()) {
+            this.category = "defaultCategory";  // 기본 카테고리 값
+        }
         this.createdAt = LocalDateTime.now();
         this.createdBy = UUID.randomUUID().toString();
         this.modifiedAt = LocalDateTime.now();
@@ -61,7 +60,7 @@ public class Store {
     }
 
     @PreUpdate
-    protected void onUpdate() {
+    public void onUpdate() {
         this.modifiedAt = LocalDateTime.now();
         this.modifiedBy = UUID.randomUUID().toString();
     }
