@@ -25,7 +25,8 @@ public enum ErrorCode {
     INVALID_CATEGORY(HttpStatus.NOT_FOUND,"카테고리 정보가 없습니다. 다른 카테고리를 입력해 주세요"),
     DUPLICATED_CATEGORY(HttpStatus.CONFLICT, "카테고리 이름이 중복됩니다."),
     NOTFOUND_CATEGORY(HttpStatus.NOT_FOUND,"카테고리가 존재하지 않습니다."),
-    DEFAULT_VALUE(HttpStatus.BAD_REQUEST, "기본 카테고리 종류 이므로 변경이 불가능합니다.");
+    DEFAULT_VALUE(HttpStatus.BAD_REQUEST, "기본 카테고리 종류 이므로 변경이 불가능합니다."),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다.");
 
 
 
