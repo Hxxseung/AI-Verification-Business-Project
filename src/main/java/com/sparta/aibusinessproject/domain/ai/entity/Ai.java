@@ -20,6 +20,6 @@ public class Ai {
     @Column(updatable = false, nullable = false)
     private UUID aiId;
 
-    private String name;
-    private String description;
+    private String request;
+    private String response;
 }
