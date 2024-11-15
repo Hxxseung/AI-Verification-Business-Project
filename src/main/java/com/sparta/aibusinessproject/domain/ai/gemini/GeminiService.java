@@ -2,6 +2,7 @@ package com.sparta.aibusinessproject.domain.ai.gemini;
 
 import com.sparta.aibusinessproject.domain.ai.dto.AiData;
 import com.sparta.aibusinessproject.domain.ai.repository.AiRepository;
+import com.sparta.aibusinessproject.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

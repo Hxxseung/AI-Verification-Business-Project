@@ -7,9 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -21,5 +18,5 @@ public interface AiRepository extends JpaRepository<Ai, UUID> , AiRepositoryCust
 
     @Modifying
     @Query("UPDATE Ai a SET a.deletedAt = CURRENT TIMESTAMP , a.deletedBy = :deletedBy WHERE a.id = :aiId")
-    void delete(@Param("aiId") UUID aiId, @Param("deletedBy")String deletedBy);
+    void delete(@Param("aiId") UUID aiId, @Param("deletedBy")UUID deletedBy);
 }

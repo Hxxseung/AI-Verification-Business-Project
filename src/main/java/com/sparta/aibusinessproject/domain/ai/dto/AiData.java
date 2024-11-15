@@ -1,9 +1,8 @@
 package com.sparta.aibusinessproject.domain.ai.dto;
 
 import com.sparta.aibusinessproject.domain.ai.entity.Ai;
-import lombok.Builder;
+import com.sparta.aibusinessproject.domain.member.entity.Member;
 
-import java.util.UUID;
 
 public record AiData(
         Member member,

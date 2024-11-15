@@ -1,6 +1,7 @@
 package com.sparta.aibusinessproject.domain.ai.entity;
 
 import com.sparta.aibusinessproject.domain.ai.dto.response.AiSearchListResponse;
+import com.sparta.aibusinessproject.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,7 +39,7 @@ public class Ai{
 
     public AiSearchListResponse toResponseDto() {
         return new AiSearchListResponse(
-                member.getName(),
+                member.getUsername(),
                 question,
                 message
         );

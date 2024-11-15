@@ -9,6 +9,7 @@ import com.sparta.aibusinessproject.domain.ai.gemini.GeminiInterface;
 import com.sparta.aibusinessproject.domain.ai.gemini.GeminiRequest;
 import com.sparta.aibusinessproject.domain.ai.gemini.GeminiResponse;
 import com.sparta.aibusinessproject.domain.ai.repository.AiRepository;
+import com.sparta.aibusinessproject.domain.member.entity.Member;
 import com.sparta.aibusinessproject.global.exception.ApplicationException;
 import com.sparta.aibusinessproject.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -56,10 +57,10 @@ public class AiService {
         return aiResponseMessage;
     }
 
-    public List<AiSearchResponse> getDataFromUser(UserDetailsImpl userDetails) {
-        Member member = userDetails.getUser();
+    public List<AiSearchResponse> getDataFromUser(Ai ai) {
+        Member member = ai.getMember();
 
-        List<AiSearchResponse> aiList = aiRepository.findByUserUserId(user.getUserId()).stream()
+        List<AiSearchResponse> aiList = aiRepository.findByUserUserId(String.valueOf(ai.getId())).stream()
                 .map(s->AiSearchResponse.from(s))
                 .toList();
 
@@ -73,16 +74,16 @@ public class AiService {
     }
 
     @Transactional
-    public UUID delete(UUID aiId, User user) {
+    public UUID delete(UUID aiId, Member member) {
 
         Ai ai = aiRepository.findById(aiId)
                 .orElseThrow(()-> new ApplicationException(ErrorCode.INVALID_AI));
 
-        if(!ai.getUser().getUserId().equals(user.getUserId())){
+        if(!ai.getMember().getId().equals(member.getId())){
             throw new ApplicationException(ErrorCode.ACCESS_DENIED);
         }
 
-        aiRepository.delete(ai.getId(),user.getUserId());
+        aiRepository.delete(ai.getId(),member.getId());
         return aiId;
     }
 
