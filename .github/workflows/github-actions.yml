@@ -60,7 +60,7 @@ jobs:
 
       ## deploy to dev
       - name: Deploy to dev
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.1.0
         id: deploy-prod
         if: contains(github.ref, 'ci-cd')
         with:
