@@ -1,5 +1,5 @@
 # server base image - java 11
-FROM adoptopenjdk/openjdk17
+FROM adoptopenjdk/openjdk:17-alpine
 
 # copy .jar file to docker
 COPY ./build/libs/aibusiness-0.0.1-SNAPSHOT.jar app.jar
