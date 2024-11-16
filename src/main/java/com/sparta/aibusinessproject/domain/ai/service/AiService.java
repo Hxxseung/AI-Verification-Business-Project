@@ -60,7 +60,7 @@ public class AiService {
     public List<AiSearchResponse> getDataFromUser(Ai ai) {
         Member member = ai.getMember();
 
-        List<AiSearchResponse> aiList = aiRepository.findByUserUserId(String.valueOf(ai.getId())).stream()
+        List<AiSearchResponse> aiList = aiRepository.findByMemberId(UUID.fromString(String.valueOf(ai.getId()))).stream()
                 .map(s->AiSearchResponse.from(s))
                 .toList();
 
@@ -82,8 +82,6 @@ public class AiService {
         if(!ai.getMember().getId().equals(member.getId())){
             throw new ApplicationException(ErrorCode.ACCESS_DENIED);
         }
-
-        aiRepository.delete(ai.getId(),member.getId());
         return aiId;
     }
 

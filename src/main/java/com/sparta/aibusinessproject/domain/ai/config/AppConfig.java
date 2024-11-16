@@ -14,7 +14,7 @@ public class AppConfig {
 
     @Bean
     public RestClient geminiRestClient(@Value("${gemini.baseurl}") String baseUrl,
-                                       @Value("${googleai.api.key}") String apikey) {
+                                       @Value("${gemini.apikey}") String apikey) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("x-goog-api-key",apikey)

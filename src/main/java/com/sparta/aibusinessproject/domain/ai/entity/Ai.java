@@ -8,27 +8,27 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Where;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@EntityListeners(value = {AuditingEntityListener.class})
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "p_ai")
 @Builder
-// Delete의 값이 null인 정보만 가져옴
 @Where(clause = "deleted_at is NULL")
-// Delete 쿼리문이 동작될때, 실제로는 Delete쿼리문이 가지않고 아래의 쿼리문이 동작함
-public class Ai{
+public class Ai {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Column(length = 50, nullable = false)
@@ -36,6 +36,17 @@ public class Ai{
 
     private String message;
 
+    @CreatedDate  // 생성 시간 자동 설정
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    // Builder 패턴에서 createdAt을 설정하는 메서드
+    @Builder
+    public Ai(Member member, String question, String message) {
+        this.member = member;
+        this.question = question;
+        this.message = message;
+    }
 
     public AiSearchListResponse toResponseDto() {
         return new AiSearchListResponse(
@@ -44,4 +55,5 @@ public class Ai{
                 message
         );
     }
+
 }
