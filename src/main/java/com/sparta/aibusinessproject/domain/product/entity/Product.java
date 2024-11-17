@@ -14,6 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "p_products")
 public class Product {
 
     @Id

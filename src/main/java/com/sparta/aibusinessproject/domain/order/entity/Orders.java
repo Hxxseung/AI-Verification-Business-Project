@@ -12,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "p_orders")
 public class Orders {
 
     @Id
@@ -44,7 +45,7 @@ public class Orders {
     private LocalDateTime deletedAt;
 
     @Column
-    private Long deletedBy;
+    private UUID deletedBy; // UUID 타입으로 변경
 
     @PrePersist
     public void onCreate() {

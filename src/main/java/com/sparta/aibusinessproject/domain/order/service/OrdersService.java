@@ -35,19 +35,23 @@ public class OrdersService {
 
     // 주문 소프트 삭제
     @Transactional
-    public void softDeleteOrder(UUID id, Long userId) {
+    public void softDeleteOrder(UUID id, UUID userId) {
         Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(OrderNotFoundException::new); // 존재하지 않으면 예외 발생
+                .orElseThrow(OrderNotFoundException::new);
 
-        order.setDeletedAt(LocalDateTime.now()); // 삭제 시간 설정
-        order.setDeletedBy(userId); // 삭제한 사용자 ID 설정
+        if (!order.getUserId().equals(userId)) { // UUID 비교
+            throw new IllegalArgumentException("You do not have permission to delete this order.");
+        }
+
+        order.setDeletedAt(LocalDateTime.now());
+        order.setDeletedBy(userId); // UUID로 저장
         ordersRepository.save(order);
     }
 
     // 주문 단일 조회
     public OrdersResponseDto getOrderById(UUID id) {
         Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(OrderNotFoundException::new); // 존재하지 않으면 예외 발생
+                .orElseThrow(OrderNotFoundException::new);
         return OrdersConverter.convertToDto(order);
     }
 
@@ -62,11 +66,11 @@ public class OrdersService {
     @Transactional
     public OrdersResponseDto updateOrder(UUID id, OrdersRequestDto requestDto) {
         Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(OrderNotFoundException::new); // 존재하지 않으면 예외 발생
+                .orElseThrow(OrderNotFoundException::new);
 
-        order.setStatus(requestDto.getStatus()); // 상태 업데이트
-        order.setTotalPrice(requestDto.getTotalPrice()); // 총 금액 업데이트
-        order.setDetail(requestDto.getDetail()); // 상세 정보 업데이트
+        order.setStatus(requestDto.getStatus());
+        order.setTotalPrice(requestDto.getTotalPrice());
+        order.setDetail(requestDto.getDetail());
         Orders updatedOrder = ordersRepository.save(order);
 
         return OrdersConverter.convertToDto(updatedOrder);

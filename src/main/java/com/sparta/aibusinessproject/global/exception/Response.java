@@ -20,7 +20,7 @@ public class Response<T> {
                 .build();
     }
 
-    public static <T> Response<T> error(T result) {
+    public static <T> Response<T> error(T result, String s) {
         return Response.<T>builder()
                 .resultCode("ERROR")
                 .result(result)
