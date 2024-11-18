@@ -14,7 +14,8 @@ public record StoreCreateRequest(
         String modifiedBy,
         String deletedBy,
         String category,
-        UUID userId
+        UUID userId,
+        UUID storeId
 ) {
 
     // request -> dto
@@ -29,6 +30,7 @@ public record StoreCreateRequest(
                 .modifiedBy(request.modifiedBy())
                 .deletedBy(request.deletedBy())
                 .userID(request.userId())
+                .storeID(request.storeId())
                 .build();
     }
 }

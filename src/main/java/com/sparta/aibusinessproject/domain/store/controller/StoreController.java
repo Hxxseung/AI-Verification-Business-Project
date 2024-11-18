@@ -24,8 +24,16 @@ public class StoreController {
     // 가게 생성
     @PostMapping
     public Response<?> store(@RequestBody StoreCreateRequest request) {
-        storeService.createOrder(request);
-        return  Response.success("가게 생성에 성공하였습니다");
+        try {
+            // 가게 생성하고 storeId를 반환받음
+            UUID storeId = storeService.createOrder(request);
+
+            // storeId 포함하여 성공 메시지 반환
+            return Response.success("가게 생성에 성공하였습니다. 생성된 storeId: " + storeId);
+        } catch (Exception e) {
+            // 예외가 발생하면 에러 메시지 반환
+            return Response.error("가게 생성에 실패하였습니다. " + e.getMessage());
+        }
     }
 
     // 전체 가게 조회

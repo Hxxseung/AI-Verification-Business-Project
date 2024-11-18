@@ -2,7 +2,6 @@ package com.sparta.aibusinessproject.domain.store.service;
 
 import com.sparta.aibusinessproject.domain.store.dto.StoreData;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreCreateRequest;
-import com.sparta.aibusinessproject.domain.store.dto.request.StoreSearchListRequest;
 import com.sparta.aibusinessproject.domain.store.dto.request.StoreUpdateRequest;
 import com.sparta.aibusinessproject.domain.store.entity.Store;
 import com.sparta.aibusinessproject.domain.store.repository.StoreRepository;
@@ -25,7 +24,7 @@ public class StoreService {
 
     // 가게 추가
     @Transactional
-    public void createOrder(StoreCreateRequest requestDto) {
+    public UUID createOrder(StoreCreateRequest requestDto) {
         StoreData data = StoreCreateRequest.toDto(requestDto);
 
         // 존재하는 가게이름인지 확인
@@ -34,9 +33,12 @@ public class StoreService {
         // 존재하지 않다면
         if(store.isEmpty()) {
             Store storeEntity = storeRepository.save(StoreData.toEntity(data));
+            return storeEntity.getStoreId();
         }else{
             throw new ApplicationException(ErrorCode.DUPLICATED_STORENAME);
         }
+
+
     }
 
     @Transactional
