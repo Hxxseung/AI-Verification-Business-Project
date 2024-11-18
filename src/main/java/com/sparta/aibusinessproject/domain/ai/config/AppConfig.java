@@ -15,6 +15,7 @@ public class AppConfig {
     @Bean
     public RestClient geminiRestClient(@Value("${gemini.baseurl}") String baseUrl,
                                        @Value("${gemini.apikey}") String apikey) {
+        System.out.println(baseUrl);
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("x-goog-api-key",apikey)

@@ -17,4 +17,6 @@ public interface StoreRepository extends JpaRepository<Store, UUID>{
 
     Optional<Store> findByName(String storeName);
 
+
+    Store findByUserId(UUID id);
 }
