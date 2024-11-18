@@ -10,7 +10,7 @@ import java.util.UUID;
 @Setter
 public class OrdersResponseDto {
     private UUID orderId;
-    private UUID userId;
+    private String userId;
     private UUID storeId;
     private String status;
     private int totalPrice;

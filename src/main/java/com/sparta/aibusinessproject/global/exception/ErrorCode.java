@@ -26,7 +26,11 @@ public enum ErrorCode {
     DEFAULT_VALUE(HttpStatus.BAD_REQUEST, "기본 카테고리 종류 이므로 변경이 불가능합니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-    INVALID_AI(HttpStatus.NOT_FOUND, "존재하지 않는 AI주소입니다.");
+    INVALID_AI(HttpStatus.NOT_FOUND, "존재하지 않는 AI주소입니다."),
+
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제를 찾을 수 없습니다."),
+    INVALID_PAYMENT_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 결제 상태입니다."),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다.");
 
 
     private HttpStatus status;

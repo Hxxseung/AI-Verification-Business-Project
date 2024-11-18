@@ -6,7 +6,7 @@ import java.util.UUID;
 public record GetReviewResponse (
         UUID reviewId,
         UUID orderId,
-        UUID memberId,
+        String username,
         String contents,
         Integer score
 ) {
