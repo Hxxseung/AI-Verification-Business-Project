@@ -2,7 +2,7 @@ package com.sparta.aibusinessproject.domain.ai.gemini;
 
 import com.sparta.aibusinessproject.domain.ai.dto.AiData;
 import com.sparta.aibusinessproject.domain.ai.repository.AiRepository;
-import com.sparta.aibusinessproject.domain.member.entity.Member;
+import com.sparta.aibusinessproject.domain.store.entity.Store;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class GeminiService {
         return geminiInterface.getCompletion(GEMINI_PRO, request);
     }
 
-    public String getCompletion(String text, Member member){
+    public String getCompletion(String text, Store store){
         GeminiRequest geminiRequest = new GeminiRequest(text+", 답변을 최대한 간결하게 50자 이하로 해줘");
         GeminiResponse response = getCompletion(geminiRequest);
 
@@ -31,7 +31,7 @@ public class GeminiService {
                 .orElse(null);
 
         // DB 저장
-        aiRepository.save(AiData.AiData(member,text,aiResult));
+        aiRepository.save(AiData.AiData(store,text,aiResult));
         return aiResult;
     }
 }

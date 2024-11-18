@@ -9,7 +9,7 @@ import com.sparta.aibusinessproject.domain.ai.gemini.GeminiInterface;
 import com.sparta.aibusinessproject.domain.ai.gemini.GeminiRequest;
 import com.sparta.aibusinessproject.domain.ai.gemini.GeminiResponse;
 import com.sparta.aibusinessproject.domain.ai.repository.AiRepository;
-import com.sparta.aibusinessproject.domain.member.entity.Member;
+import com.sparta.aibusinessproject.domain.store.entity.Store;
 import com.sparta.aibusinessproject.global.exception.ApplicationException;
 import com.sparta.aibusinessproject.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -49,18 +49,18 @@ public class AiService {
     }
 
     @Transactional
-    public String getCompletion(String text, Member member){
+    public String getCompletion(String text, Store store){
         String aiResponseMessage = getAiResponse(text);
 
         // DB 저장
-        aiRepository.save(AiData.AiData(member, text, aiResponseMessage));
+        aiRepository.save(AiData.AiData(store, text, aiResponseMessage));
         return aiResponseMessage;
     }
 
     public List<AiSearchResponse> getDataFromUser(Ai ai) {
-        Member member = ai.getMember();
+        Store store = ai.getStore();
 
-        List<AiSearchResponse> aiList = aiRepository.findByMemberId(UUID.fromString(String.valueOf(ai.getId()))).stream()
+        List<AiSearchResponse> aiList = aiRepository.findById(UUID.fromString(String.valueOf(ai.getId()))).stream()
                 .map(s->AiSearchResponse.from(s))
                 .toList();
 
@@ -74,12 +74,12 @@ public class AiService {
     }
 
     @Transactional
-    public UUID delete(UUID aiId, Member member) {
+    public UUID delete(UUID aiId, Store store) {
 
         Ai ai = aiRepository.findById(aiId)
                 .orElseThrow(()-> new ApplicationException(ErrorCode.INVALID_AI));
 
-        if(!ai.getMember().getId().equals(member.getId())){
+        if(!ai.getStore().getStoreId().equals(store.getStoreId())){
             throw new ApplicationException(ErrorCode.ACCESS_DENIED);
         }
         return aiId;

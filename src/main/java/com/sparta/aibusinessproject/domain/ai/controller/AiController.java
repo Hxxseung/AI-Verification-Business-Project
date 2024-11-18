@@ -7,6 +7,7 @@ import com.sparta.aibusinessproject.domain.ai.dto.response.AiSearchListResponse;
 import com.sparta.aibusinessproject.domain.ai.dto.response.AiSearchResponse;
 import com.sparta.aibusinessproject.domain.ai.entity.Ai;
 import com.sparta.aibusinessproject.domain.ai.service.AiService;
+import com.sparta.aibusinessproject.domain.store.entity.Store;
 import com.sparta.aibusinessproject.global.exception.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,9 +31,12 @@ public class AiController {
     private final AiService service;
 
 
-    @PostMapping
-    public Response<AiMessageResponse> getMessage(@RequestBody AiMessageRequest reqeust, @AuthenticationPrincipal Ai ai){
-        return Response.success(new AiMessageResponse(service.getCompletion(reqeust.text(), ai.getMember())));
+    @PostMapping("/message/{storeId}")
+    public Response<AiMessageResponse> getMessage(@RequestBody AiMessageRequest request, @AuthenticationPrincipal Store store) {
+        if (store == null) {
+            throw new IllegalArgumentException("Authenticated store is null");
+        }
+        return Response.success(new AiMessageResponse(service.getCompletion(request.text(), store)));
     }
 
 
@@ -43,7 +47,7 @@ public class AiController {
     }
 
     // 데이터 전부 출력
-    @PostMapping("/{productId}")
+    @PostMapping("/data")
     public Response<Page<AiSearchListResponse>> getAllData(Pageable pageable) {
 
         int size = DEFAULT_PAGE_SIZE; // 기본 10건
@@ -60,7 +64,7 @@ public class AiController {
     // 가게 삭제
     @DeleteMapping
     public Response<?> storeDelete(@PathVariable UUID aiId, @AuthenticationPrincipal Ai ai) {
-        UUID  uuid = service.delete(aiId,ai.getMember());
+        UUID  uuid = service.delete(aiId,ai.getStore());
         return Response.success( uuid +"가게 정보가 삭제되었습니다.");
     }
 

@@ -1,7 +1,7 @@
 package com.sparta.aibusinessproject.domain.ai.entity;
 
 import com.sparta.aibusinessproject.domain.ai.dto.response.AiSearchListResponse;
-import com.sparta.aibusinessproject.domain.member.entity.Member;
+import com.sparta.aibusinessproject.domain.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,8 +28,8 @@ public class Ai {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 
     @Column(length = 50, nullable = false)
     private String question;
@@ -42,15 +42,15 @@ public class Ai {
 
     // Builder 패턴에서 createdAt을 설정하는 메서드
     @Builder
-    public Ai(Member member, String question, String message) {
-        this.member = member;
+    public Ai(Store store, String question, String message) {
+        this.store = store;
         this.question = question;
         this.message = message;
     }
 
     public AiSearchListResponse toResponseDto() {
         return new AiSearchListResponse(
-                member.getUsername(),
+                store.getStoreId(),
                 question,
                 message
         );

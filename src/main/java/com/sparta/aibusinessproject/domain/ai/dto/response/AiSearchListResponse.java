@@ -1,7 +1,9 @@
 package com.sparta.aibusinessproject.domain.ai.dto.response;
 
+import java.util.UUID;
+
 public record AiSearchListResponse(
-        String userName,
+        UUID storeID,
         String question,
         String message
 ) {
