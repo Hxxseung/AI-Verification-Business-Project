@@ -20,7 +20,7 @@ public class Orders {
     private UUID orderId;
 
     @Column(nullable = false)
-    private UUID userId;
+    private String userId; // UUID -> String으로 변경
 
     @Column(nullable = false)
     private UUID storeId;
@@ -45,7 +45,7 @@ public class Orders {
     private LocalDateTime deletedAt;
 
     @Column
-    private UUID deletedBy; // UUID 타입으로 변경
+    private String deletedBy; // UUID -> String으로 변경
 
     @PrePersist
     public void onCreate() {
@@ -56,4 +56,9 @@ public class Orders {
     public void onUpdate() {
         this.modifiedAt = LocalDateTime.now();
     }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null; // 소프트 삭제 여부 확인
+    }
+
 }

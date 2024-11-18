@@ -21,7 +21,6 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // 상품 생성 (ADMIN, OWNER만 접근 가능)
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PostMapping
     public Response<ProductResponseDto> createProduct(@RequestBody @Valid ProductRequestDto requestDto) {
@@ -29,14 +28,12 @@ public class ProductController {
         return Response.success(product);
     }
 
-    // 상품 조회 (ID로 조회)
     @GetMapping("/{id}")
     public Response<ProductResponseDto> getProduct(@PathVariable UUID id) {
         ProductResponseDto product = productService.getProductById(id);
         return Response.success(product);
     }
 
-    // 상품 수정 (ADMIN, OWNER만 접근 가능)
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PutMapping("/{id}")
     public Response<ProductResponseDto> updateProduct(
@@ -44,24 +41,22 @@ public class ProductController {
             @RequestBody @Valid ProductRequestDto requestDto,
             Authentication authentication) {
         String userRole = authentication.getAuthorities().iterator().next().getAuthority();
-        UUID userId = UUID.fromString(authentication.getName());
-        ProductResponseDto updatedProduct = productService.updateProduct(id, requestDto, userRole, userId);
+        String username = authentication.getName(); // Username 사용
+        ProductResponseDto updatedProduct = productService.updateProduct(id, requestDto, userRole, username);
         return Response.success(updatedProduct);
     }
 
-    // 상품 삭제 (ADMIN, OWNER만 접근 가능)
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @DeleteMapping("/{id}")
     public Response<Void> deleteProduct(
             @PathVariable UUID id,
             Authentication authentication) {
         String userRole = authentication.getAuthorities().iterator().next().getAuthority();
-        UUID userId = UUID.fromString(authentication.getName());
-        productService.deleteProduct(id, userRole, userId);
-        return Response.success(null); // 삭제 후 반환 값 없음
+        String username = authentication.getName(); // Username 사용
+        productService.deleteProduct(id, userRole, username);
+        return Response.success(null);
     }
 
-    // 상품 검색 (키워드로 검색, 숨겨진 상품 제외)
     @GetMapping("/search")
     public Response<Page<ProductResponseDto>> searchProducts(
             @RequestParam String keyword,
@@ -70,7 +65,6 @@ public class ProductController {
         return Response.success(products);
     }
 
-    // 상품 숨김 상태 변경 (ADMIN, OWNER만 접근 가능)
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PatchMapping("/{id}/hide")
     public Response<ProductResponseDto> hideProduct(
@@ -78,8 +72,8 @@ public class ProductController {
             @RequestParam boolean isHidden,
             Authentication authentication) {
         String userRole = authentication.getAuthorities().iterator().next().getAuthority();
-        UUID userId = UUID.fromString(authentication.getName());
-        ProductResponseDto updatedProduct = productService.updateProductVisibility(id, isHidden, userRole, userId);
+        String username = authentication.getName(); // Username 사용
+        ProductResponseDto updatedProduct = productService.updateProductVisibility(id, isHidden, userRole, username);
         return Response.success(updatedProduct);
     }
 }

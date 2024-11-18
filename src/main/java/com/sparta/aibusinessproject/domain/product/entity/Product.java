@@ -48,14 +48,21 @@ public class Product {
     @Column
     private LocalDateTime updatedAt; // 수정 일자
 
+    @Column
+    private LocalDateTime deletedAt; // 소프트 삭제 필드
+
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(); // 생성 시간 설정
         this.status = ProductStatus.AVAILABLE; // 기본 상태 설정
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(); // 수정 시간 설정
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null; // 삭제 여부 확인
     }
 }
