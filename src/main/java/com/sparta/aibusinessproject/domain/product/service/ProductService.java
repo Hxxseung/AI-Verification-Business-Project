@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -31,7 +32,7 @@ public class ProductService {
     // 상품 생성
     public ProductResponseDto createProduct(ProductRequestDto requestDto) {
         Store store = storeRepository.findById(UUID.fromString(requestDto.getStoreId()))
-                .orElseThrow(StoreNotFoundException::new); // 메시지 제거
+                .orElseThrow(StoreNotFoundException::new);
 
         Product product = new Product();
         product.setName(requestDto.getName());
@@ -45,14 +46,15 @@ public class ProductService {
         return convertToDto(savedProduct);
     }
 
-    // 상품 조회
+    // ID로 상품 조회
     public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
+                .filter(p -> !p.isDeleted())
+                .orElseThrow(ProductNotFoundException::new);
         return convertToDto(product);
     }
 
-    // 상품 검색
+    // 키워드로 상품 검색
     public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(
@@ -66,21 +68,24 @@ public class ProductService {
         return products.map(this::convertToDto);
     }
 
-    // 상품 삭제
-    public void deleteProduct(UUID id, String userRole, UUID userId) {
+    // 소프트 삭제
+    public void deleteProduct(UUID id, String userRole, String username) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
+                .orElseThrow(ProductNotFoundException::new);
 
-        validateUserAccess(product.getStore().getStoreId(), userRole, userId);
-        productRepository.deleteById(id);
+        validateUserAccess(product.getStore().getStoreId(), userRole, username);
+
+        product.setDeletedAt(LocalDateTime.now());
+        productRepository.save(product);
     }
 
     // 상품 숨김 상태 업데이트
-    public ProductResponseDto updateProductVisibility(UUID id, boolean isHidden, String userRole, UUID userId) {
+    public ProductResponseDto updateProductVisibility(UUID id, boolean isHidden, String userRole, String username) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
+                .filter(p -> !p.isDeleted())
+                .orElseThrow(ProductNotFoundException::new);
 
-        validateUserAccess(product.getStore().getStoreId(), userRole, userId);
+        validateUserAccess(product.getStore().getStoreId(), userRole, username);
 
         product.setHidden(isHidden);
         Product updatedProduct = productRepository.save(product);
@@ -89,11 +94,12 @@ public class ProductService {
     }
 
     // 상품 정보 업데이트
-    public ProductResponseDto updateProduct(UUID id, @Valid ProductRequestDto requestDto, String userRole, UUID userId) {
+    public ProductResponseDto updateProduct(UUID id, @Valid ProductRequestDto requestDto, String userRole, String username) {
         Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new); // 메시지 제거
+                .filter(p -> !p.isDeleted())
+                .orElseThrow(ProductNotFoundException::new);
 
-        validateUserAccess(product.getStore().getStoreId(), userRole, userId);
+        validateUserAccess(product.getStore().getStoreId(), userRole, username);
 
         product.setName(requestDto.getName());
         product.setDescription(requestDto.getDescription());
@@ -104,22 +110,22 @@ public class ProductService {
         return convertToDto(updatedProduct);
     }
 
-    // 권한 검증 메서드
-    private void validateUserAccess(UUID storeId, String userRole, UUID userId) {
+    // 사용자의 가게 접근 권한 검증
+    private void validateUserAccess(UUID storeId, String userRole, String username) {
         if (userRole.equals("ADMIN")) {
-            return; // ADMIN은 모든 권한이 있으므로 검증 생략
+            return;
         }
 
         UUID storeUserId = storeRepository.findById(storeId)
                 .map(Store::getUserId)
-                .orElseThrow(StoreNotFoundException::new); // 메시지 제거
+                .orElseThrow(StoreNotFoundException::new);
 
-        if (!userRole.equals("OWNER") || !storeUserId.equals(userId)) {
+        if (!userRole.equals("OWNER") || !storeUserId.toString().equals(username)) {
             throw new AccessDeniedException("권한이 없습니다.");
         }
     }
 
-    // DTO 변환
+    // 엔티티를 DTO로 변환
     private ProductResponseDto convertToDto(Product product) {
         return ProductResponseDto.builder()
                 .id(product.getProductId())

@@ -20,10 +20,9 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
 
-    // 주문 생성
     public OrdersResponseDto createOrder(OrdersRequestDto requestDto) {
         Orders order = new Orders();
-        order.setUserId(requestDto.getUserId());
+        order.setUserId(requestDto.getUserId().toString());  // UUID를 String으로 변환
         order.setStoreId(requestDto.getStoreId());
         order.setStatus(requestDto.getStatus());
         order.setTotalPrice(requestDto.getTotalPrice());
@@ -33,36 +32,33 @@ public class OrdersService {
         return OrdersConverter.convertToDto(savedOrder);
     }
 
-    // 주문 소프트 삭제
     @Transactional
-    public void softDeleteOrder(UUID id, UUID userId) {
-        Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
+    public void softDeleteOrder(UUID id, String userId) {
+        Orders order = ordersRepository.findById(id)
+                .filter(o -> !o.isDeleted())
                 .orElseThrow(OrderNotFoundException::new);
 
-        if (!order.getUserId().equals(userId)) { // UUID 비교
+        if (!order.getUserId().equals(userId)) {
             throw new IllegalArgumentException("You do not have permission to delete this order.");
         }
 
         order.setDeletedAt(LocalDateTime.now());
-        order.setDeletedBy(userId); // UUID로 저장
+        order.setDeletedBy(userId);
         ordersRepository.save(order);
     }
 
-    // 주문 단일 조회
     public OrdersResponseDto getOrderById(UUID id) {
         Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(OrderNotFoundException::new);
         return OrdersConverter.convertToDto(order);
     }
 
-    // 모든 주문 조회 (소프트 삭제되지 않은 주문만)
     public List<OrdersResponseDto> getAllOrders() {
         return ordersRepository.findAllByDeletedAtIsNull().stream()
                 .map(OrdersConverter::convertToDto)
                 .toList();
     }
 
-    // 주문 업데이트
     @Transactional
     public OrdersResponseDto updateOrder(UUID id, OrdersRequestDto requestDto) {
         Orders order = ordersRepository.findByIdAndDeletedAtIsNull(id)
@@ -71,8 +67,8 @@ public class OrdersService {
         order.setStatus(requestDto.getStatus());
         order.setTotalPrice(requestDto.getTotalPrice());
         order.setDetail(requestDto.getDetail());
-        Orders updatedOrder = ordersRepository.save(order);
 
+        Orders updatedOrder = ordersRepository.save(order);
         return OrdersConverter.convertToDto(updatedOrder);
     }
 }
