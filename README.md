@@ -33,9 +33,9 @@
 
 | 역할              | 이름 |
 |-----------------| --- |
-| 가게 | 강희승 |
-| 회원 | 이주희 |
-| 상품 | 조한범 |
+| 가게,카테고리,AI | 강희승 👑|
+| 회원,리뷰,배포 | 이주희 👸🏻|
+| 상품,주문,결제 | 조한범 🫅🏻|
 
 ## Infra architecture
 <img src="https://github.com/user-attachments/assets/f281cb7a-42d3-4761-9981-8404f80a7b24" width="800" height="600" />
